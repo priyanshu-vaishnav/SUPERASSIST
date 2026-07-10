@@ -50,7 +50,7 @@ async function signIn(req, res) {
      if (!error) {
 
           res.cookie("token", data.session.access_token)
-          console.log(data.session.access_token)
+      
           return res.status(200).json({
                user: data.user
           })

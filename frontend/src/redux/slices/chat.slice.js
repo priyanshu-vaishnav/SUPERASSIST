@@ -3,17 +3,17 @@ import { createSlice } from "@reduxjs/toolkit";
 const chat = createSlice({
     name: "chatSlice",
     initialState: {
-        chat: {
+       
             chatId: null,
             chatMessage: []
-        }
+        
     },
     reducers: {
         setChatId: (state, action) => {
-            state.chat.chatId = action.payload
+            state.chatId = action.payload
         },
         setChatMessages:(state,action)=>{
-            state.chat.chatMessage.push(action.payload)
+            state.chatMessage= action.payload
         }
     }
 

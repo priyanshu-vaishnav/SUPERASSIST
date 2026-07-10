@@ -1,39 +1,29 @@
 import React, { useState } from "react";
 import "./Sidebar.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useFetchUserChatQuery } from "../../redux/api/chatApi";
+import { useEffect } from "react";
+import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
 
 function Sidebar() {
-
-
+  const chatId = useSelector((state) => state.chat.chatId);
+  const { data, refetch } = useFetchUserChatQuery();
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeView, setActiveView] = useState("chats");
-  const [activeChat, setActiveChat] = useState(null);
 
-  // ===== Tera data yaha aayega =====
-  const chats = [];
-  const agents = [];
-  const tools = [];
-  const user = useSelector((state) => state.user.value)
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setChatMessages(data?.data));
+    refetch();
+  }, [data, chatId, dispatch, refetch]);
+
+  const user = useSelector((state) => state.user.value);
 
   const handleNewChat = () => {
-
-    const ConversationsButtons = document.querySelector(".newConv"
-    )
-
-    const div = document.createElement("button")
-
-    div.innerText = "chat 1"
-    ConversationsButtons.appendChild(div)
-  };
-
-  const handleToggle = () => {
-    if (window.innerWidth < 992) {
-      setIsOpen(!isOpen);
-    } else {
-      setIsCollapsed(!isCollapsed);
-    }
+    // Logic goes here
   };
 
   return (
@@ -82,10 +72,28 @@ function Sidebar() {
           {!isCollapsed && <span>New conversation</span>}
         </button>
 
-        {/**new conversations */}
-        <div className="newConv" >
-
-        </div>
+        {data?.data?.map((chat) => (
+          <div
+            key={chat.id}
+            className={`chat-item ${chatId === chat.id ? "active" : ""}`}
+            onClick={() => dispatch(setChatId(chat.id))}
+          >
+            <div className="chat-item-icon">💬</div>
+            <div className="chat-item-content">
+              <p className="chat-item-title">
+                {chat.messages?.[0]?.content
+                  ? chat.messages[0].content.slice(0, 28) + "..."
+                  : "New Chat"}
+              </p>
+              <span className="chat-item-date">
+                {new Date(chat.created_at).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
+            </div>
+          </div>
+        ))}
 
         {/* Search */}
         {!isCollapsed && (

@@ -9,8 +9,7 @@ import Chatsection from './Chatsection'
 
 function Dashboard() {
  
-  const user = useSelector((state)=>state.user.value)
- 
+  
   
   return (
     <>
