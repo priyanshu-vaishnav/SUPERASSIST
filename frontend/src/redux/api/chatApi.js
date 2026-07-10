@@ -14,6 +14,15 @@ export const chatApi = createApi({
                 method: "POST",
             })
         }),
+        deleteUserChat: builder.mutation({
+            query: ( {chatId,id}) => ({
+                url: "chat/api/deleteSingleChat",
+                method: "POST",
+                body: { chatId ,id},
+
+            })
+        })
+        ,
         fetchUserChat: builder.query({   // mutation nahi, query
             query: () => ({
                 url: 'chat/api/fetchchats',
@@ -21,10 +30,10 @@ export const chatApi = createApi({
             }),
         }),
         sendMessage: builder.mutation({
-            query: ({chatId,humanMessage}) => ({
+            query: ({ chatId, humanMessage }) => ({
                 url: "chat/api/sendmessage",
                 method: "POST",
-                body: { chatId,humanMessage },
+                body: { chatId, humanMessage },
             })
         })
 
@@ -34,4 +43,4 @@ export const chatApi = createApi({
 
 })
 
-export const { useCreateUserChatMutation, useFetchUserChatQuery, useSendMessageMutation } = chatApi;
+export const { useCreateUserChatMutation, useFetchUserChatQuery, useSendMessageMutation ,useDeleteUserChatMutation} = chatApi;

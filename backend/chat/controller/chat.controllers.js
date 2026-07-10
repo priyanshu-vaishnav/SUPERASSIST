@@ -84,7 +84,7 @@ async function sendMessage(req, res) {
 
         const updatedMessages = [...oldMessages, ...newMessages];
 
-     
+
 
         // 3. Supabase me update karo
         const { data, error } = await supabaseAdmin
@@ -105,4 +105,20 @@ async function sendMessage(req, res) {
 
 }
 
-module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat }
+async function deleteSingleChat(req, res) {
+    const  {chatId ,id} = req.body
+    console.log(chatId)
+
+    const { data, error } = await supabaseAdmin.from("chats").delete().eq("id", chatId).single()
+    if (!error) {
+        return res.status(200).json({
+            message: "chat deleted success fully"
+        })
+    }
+    return res.status(500).json({
+        error
+    })
+
+}
+
+module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat ,deleteSingleChat}
