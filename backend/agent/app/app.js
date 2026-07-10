@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser")
- const chatRoutes = require("../routes/chat.routes.js")
+const agentRouter = require("../routes/agent.routes.js")
 const app = express();
 
 app.use(cors({
@@ -14,7 +14,7 @@ app.use(cookieParser())
 
 
 
-app.use("/api",chatRoutes)
+app.use("/api",agentRouter)
 
 app.get("/", (req, res) => {
     res.send("server is healthy")
