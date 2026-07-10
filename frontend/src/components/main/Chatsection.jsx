@@ -1,64 +1,82 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./Chatsection.css";
+import { useSelector } from "react-redux";
+import { useSendMessageMutation } from "../../redux/api/chatApi";
 
 function Chatsection() {
+  const [sendMessage, { isLoading }] = useSendMessageMutation();
+  const allChats = useSelector((state) => state.chat.chatMessage);
+  const chatId = useSelector((state) => state.chat.chatId);
+  const user = useSelector((state) => state.user.value);
+
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const messagesTrackRef = useRef(null);
 
-  // ===== Tera data yaha aayega =====
-  const user = null;
-  const chatInfo = {
-    title: "New Chat",
-    icon: "🤖",
-    color: "#6366f1",
-    agent: "AI Assistant",
-  };
-  const suggestions = [{
-    icon: "",
-    text: "Explain Redis"
-  }, {
-    icon: "",
-    text: "Help me create API"
-  },
-  {
-    icon: "",
-    text: "Make a roadmap for full stack"
-  }
-  ];
+  // Sync messages when chat changes
+  useEffect(() => {
+    if (chatId) {
+      const c = allChats?.filter((chat) => chat.id === chatId);
+      setMessages(c?.[0]?.messages || []);
+    } else {
+      setMessages([]);
+    }
+  }, [chatId, allChats]);
 
-
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  // Auto-resize textarea
   const handleInputChange = (e) => {
     setInputText(e.target.value);
     const ta = textareaRef.current;
     if (ta) {
       ta.style.height = "auto";
-      ta.style.height = Math.min(ta.scrollHeight, 100) + "px";
+      ta.style.height = Math.min(ta.scrollHeight, 140) + "px";
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e?.preventDefault();
     const text = inputText.trim();
     if (!text) return;
 
     const userMsg = {
-      id: Date.now(),
-      text,
-      sender: "me",
-      time: new Date().toISOString(),
-      status: "sent",
+      role: "human",
+      message: text,
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    try {
+      setIsTyping(true);
+      const response = await sendMessage({ chatId, humanMessage: text }).unwrap();
+      const aiReply =
+        response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
+      setMessages((prev) => [...prev, { role: "ai", message: aiReply }]);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          message: "⚠️ Something went wrong. Please try again.",
+          isError: true,
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -68,68 +86,146 @@ function Chatsection() {
     }
   };
 
+  const chatInfo = useMemo(
+    () => ({
+      title: "NexusAI Assistant",
+      icon: "✦",
+      color: "#6366f1",
+      agent: "AI Assistant",
+    }),
+    []
+  );
+
+  const suggestions = [
+    { icon: "💡", text: "Explain Redis in simple terms" },
+    { icon: "⚡", text: "Help me build a REST API" },
+    { icon: "🗺️", text: "Create a full-stack roadmap" },
+    { icon: "🎨", text: "Design a modern UI system" },
+  ];
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="chat-shell">
+      {/* Animated background */}
+      <div className="chat-bg-gradient">
+        <div className="bg-blob bg-blob-1" />
+        <div className="bg-blob bg-blob-2" />
+        <div className="bg-blob bg-blob-3" />
+      </div>
+
       {/* Header */}
       <header className="chat-topbar">
         <div className="topbar-left">
           <div
             className="topbar-avatar"
-            style={{ background: chatInfo.color }}
+            style={{ background: `linear-gradient(135deg, ${chatInfo.color}, #8b5cf6)` }}
           >
-            {chatInfo.icon}
-            <span className="topbar-presence"></span>
+            <span>{chatInfo.icon}</span>
+            <span className="topbar-presence" />
           </div>
           <div className="topbar-info">
             <h5>{chatInfo.title}</h5>
             <div className="topbar-status">
-              <span className="status-light"></span>
-              <span>{isTyping ? "Typing..." : "Online"}</span>
-              {chatInfo.agent && (
-                <>
-                  <span className="status-divider">·</span>
-                  <span className="status-agent">{chatInfo.agent}</span>
-                </>
-              )}
+              <span className="status-light" />
+              <span>{isLoading ? "Thinking..." : "Online"}</span>
+              <span className="status-divider">•</span>
+              <span className="status-agent">{chatInfo.agent}</span>
             </div>
           </div>
         </div>
 
         <div className="topbar-right">
-          <button className="topbar-action">📞</button>
-          <button className="topbar-action">📹</button>
-          <button className="topbar-action">🔍</button>
-          <button className="topbar-action">⋯</button>
+         
+          
+          <button className="topbar-action" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+              <path
+                d="M21 21l-4.35-4.35"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+          <button className="topbar-action" title="More options">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+            </svg>
+          </button>
         </div>
       </header>
 
       {/* Messages */}
       <main className="messages-pane">
-        <div className="messages-track">
+        <div className="messages-track" ref={messagesTrackRef}>
           {messages.length === 0 ? (
             <div className="welcome-screen">
-              <div className="welcome-symbol">{chatInfo.icon}</div>
-              <h3>Start a conversation</h3>
-              <p>Ask me anything, I'm here to help</p>
+              <div className="welcome-symbol">
+                <div className="welcome-glow" />
+                <span>{chatInfo.icon}</span>
+              </div>
+              <h3>How can I help you today?</h3>
+              <p>Ask me anything — from coding to creative writing</p>
+
+              <div className="welcome-grid">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    className="welcome-card"
+                    onClick={() => {
+                      setInputText(s.text);
+                      textareaRef.current?.focus();
+                    }}
+                  >
+                    <span className="welcome-card-icon">{s.icon}</span>
+                    <span className="welcome-card-text">{s.text}</span>
+                    <span className="welcome-card-arrow">→</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             <>
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} user={user} />
+              <div className="messages-divider">
+                <span>Today</span>
+              </div>
+
+              {messages.map((msg, i) => (
+                <MessageBubble
+                  key={i}
+                  message={msg}
+                  user={user}
+                  chatInfo={chatInfo}
+                  showTime={i === messages.length - 1 || messages[i + 1]?.role !== msg.role}
+                  time={formatTime(msg.timestamp || new Date())}
+                />
               ))}
 
               {isTyping && (
                 <div className="bubble-row ai">
                   <div
                     className="bubble-avatar"
-                    style={{ background: chatInfo.color }}
+                    style={{
+                      background: `linear-gradient(135deg, ${chatInfo.color}, #8b5cf6)`,
+                    }}
                   >
                     {chatInfo.icon}
                   </div>
                   <div className="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span />
+                    <span />
+                    <span />
                   </div>
                 </div>
               )}
@@ -140,93 +236,144 @@ function Chatsection() {
         </div>
       </main>
 
-      {/* Suggestions */}
-      {suggestions.length > 0 && messages.length === 0 && (
-        <div className="suggestions-row">
-          {suggestions.map((s, i) => (
-            <button
-              key={i}
-              className="suggestion-pill"
-              onClick={() => {
-                setInputText(s.text);
-              }}
-            >
-              <span>{s.icon}</span>
-              <span>{s.text}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Input */}
       <form onSubmit={handleSubmit} className="composer">
         <div className="composer-inner">
-          <button type="button" className="composer-icon">📎</button>
-          <button type="button" className="composer-icon">😊</button>
+          <button type="button" className="composer-icon" title="Attach file">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
 
           <textarea
             ref={textareaRef}
             value={inputText}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
+            placeholder="Message NexusAI..."
             className="composer-input"
             rows="1"
           />
 
-          <button type="button" className="composer-icon">🎤</button>
+          <button type="button" className="composer-icon" title="Voice input">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
           <button
             type="submit"
             className={`composer-send ${inputText.trim() ? "active" : ""}`}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isLoading}
+            title="Send message"
           >
-            ➤
+            {isLoading ? (
+              <span className="send-spinner" />
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
           </button>
+        </div>
+
+        <div className="composer-footer">
+          <span>NexusAI can make mistakes. Verify important info.</span>
         </div>
       </form>
     </div>
   );
 }
 
-function MessageBubble({ message, user }) {
-  const isMe = message.sender === "me";
 
-  const formatTime = (ts) => {
-    if (!ts) return "";
-    return new Date(ts).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+
+function MessageBubble({ message, user, chatInfo, showTime, time }) {
+  const isMe = message.role === "human";
+  const isError = message.isError;
+
+  const formatMessage = (text) => {
+    if (!text) return null;
+
+    return (
+      <ReactMarkdown
+        components={{
+          code({ inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || "");
+            return !inline && match ? (
+              <SyntaxHighlighter
+                style={oneDark}
+                language={match[1]}
+                PreTag="div"
+                customStyle={{ borderRadius: "8px", fontSize: "13px", margin: "8px 0" }}
+              >
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
+          p({ children }) {
+            return <p style={{ margin: "0 0 8px" }}>{children}</p>;
+          },
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    );
   };
 
   return (
     <div className={`bubble-row ${isMe ? "me" : "ai"}`}>
       {!isMe && (
-        <div className="bubble-avatar" style={{ background: "#6366f1" }}>
-          🤖
+        <div
+          className="bubble-avatar"
+          style={{
+            background: `linear-gradient(135deg, ${chatInfo.color}, #8b5cf6)`,
+          }}
+        >
+          {chatInfo.icon}
         </div>
       )}
 
       <div className="bubble-stack">
-        <div className="bubble-pill">
-          <p>{message.text}</p>
+        <div className={`bubble-pill ${isError ? "error" : ""} ${isMe ? "user" : "ai"}`}>
+          {formatMessage(message.message)}
         </div>
-        <div className="bubble-meta">
-          <span>{formatTime(message.time)}</span>
-          {isMe && message.status && (
-            <span className="bubble-status">
-              {message.status === "read" ? "✓✓" : "✓"}
-            </span>
-          )}
-        </div>
+        {showTime && (
+          <span className="bubble-time">
+            {isMe ? "You" : chatInfo.agent} · {time}
+          </span>
+        )}
       </div>
 
       {isMe && (
         <div
           className="bubble-avatar"
-          style={{ background: "linear-gradient(135deg, #ec4899, #f43f5e)" }}
+          style={{
+            background: "linear-gradient(135deg, #ec4899, #f43f5e)",
+          }}
         >
-          {user?.avatar || user?.name?.[0]?.toUpperCase() || "U"}
+          {user?.avatar || user?.name?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || "U"}
         </div>
       )}
     </div>

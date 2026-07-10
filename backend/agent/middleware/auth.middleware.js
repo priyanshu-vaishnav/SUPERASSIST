@@ -11,10 +11,10 @@ async function Protection(req, res, next) {
             });
         }
 
-     
+
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
-  
+
         if (error) {
             return res.status(401).json({
                 message: "Invalid or Expired token",
@@ -28,7 +28,7 @@ async function Protection(req, res, next) {
             });
         }
 
- 
+
         req.userId = user.id;
         next();
 
