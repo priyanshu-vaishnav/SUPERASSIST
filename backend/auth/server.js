@@ -8,8 +8,6 @@ const app = require("./app/app.js")
 // dbConnect();
 
 
-app.use('/api',authRoutes)
-
 
 app.listen(process.env.AUTH_PORT,()=>{
     console.log("AuthService running on port ",process.env.AUTH_PORT)

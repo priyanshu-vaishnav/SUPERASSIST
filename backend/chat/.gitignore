@@ -23,20 +23,12 @@ build/
 coverage/
 .cache/
 
-# Editor and IDE files
+# Editor and OS files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 *.sublime-workspace
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# Misc
-npm-debug.log*
-yarn-debug.log*
-package-lock.json
-pnpm-debug.log*
