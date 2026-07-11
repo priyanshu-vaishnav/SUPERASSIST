@@ -1,33 +1,45 @@
-require("dotenv").config({path:"../.env"})
+require("dotenv").config({ path: "../.env" });
 const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { ChatOllama } = require("@langchain/ollama");
-
+const { ChatOpenAI } = require("@langchain/openai");
 
 async function LLM_MODEL(agent) {
-
-
-    if(agent ==="basic") {
+    if (agent === "basic") {
         console.log(
-            `[System] Switching to LOCAL OLLAMA (${process.env.OLLAMA_MODEL_NAME || "gemma2"})...`,
+            `[System] Switching to LOCAL OLLAMA (${process.env.OLLAMA_MODEL_NAME || "qwen2.5:1.5b"})...`
         );
-        return model = new ChatOllama({
-            model: "qwen3", // Default model set kiya
+        return new ChatOllama({
+            model: process.env.OLLAMA_CLOUD_MODEL || "gpt-oss:120b", // cloud-tagged model
             temperature: 0,
-            baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
-            streaming: false, // 👈 Ye line add karo taaki response freeze na ho
+            baseUrl: "https://ollama.com",
+            headers: {
+                Authorization: `Bearer 24a5f28d1b66446489d2ce390f205943.t_OMLXzQE9R2euD9wjn7yUGU`,
+            },
+            streaming: true,
         });
-    
     }
-    if(agent === "extended") 
-     {
+
+    if (agent === "extended") {
         console.log("[System] Switching to CLOUD GOOGLE GEMINI...");
-        return model = new ChatGoogleGenerativeAI({
-            apiKey: process.env.GEMINI_API_KEY, // Env variable se secure key load hogi
-            model: "gemini-2.5-flash", // Default recommended model set kiya
+        return new ChatGoogleGenerativeAI({
+            apiKey: process.env.GOOGLE_API_KEY, // .env se load hogi, hardcode mat karo
+            model: "gemini-2.5-flash",
+            temperature: 0,
+            verbose: true,
+        });
+    }
+
+    if (agent === "openai") {
+        console.log("[System] Switching to CLOUD OPENAI...");
+        return new ChatOpenAI({
+            apiKey: process.env.OPENAI_API_KEY, // .env se load hogi
+            model: process.env.OPENAI_MODEL_NAME || "gpt-4o-mini",
             temperature: 0,
         });
     }
 
+    // koi bhi agent match na ho to error throw karo, silently undefined return mat karo
+    throw new Error(`Unknown agent type: ${agent}`);
 }
 
-module.exports = LLM_MODEL
+module.exports = LLM_MODEL;

@@ -1,11 +1,15 @@
 const graph = require("../graph/graph");
-const {supabase,supabaseAdmin } = require('../config/supabase')
+const { supabase, supabaseAdmin } = require('../config/supabase')
 
 
 const chatController = async (req, res) => {
 
+    
+
     const userId = req.userId;
     const { chatId, humanMessage } = req.body;
+
+    console.log(chatId,humanMessage)
 
     // Cleaned up validation & fixed the .status(400) typo
     if (!chatId || !humanMessage || !humanMessage.trim()) {
@@ -22,6 +26,8 @@ const chatController = async (req, res) => {
 
         const result = await graph.invoke(initialState);
 
+
+console.log("step-2")
 
         // 1. Pehle existing messages fetch karo
         const { data: existingChat, error: fetchError } = await supabaseAdmin
@@ -45,7 +51,7 @@ const chatController = async (req, res) => {
 
 
 
-     
+
         const { data, error } = await supabaseAdmin
             .from("chats")
             .update({ messages: updatedMessages })
@@ -53,7 +59,11 @@ const chatController = async (req, res) => {
             .select();
 
         if (!error) {
-            return res.status(200).json({ data });
+            console.log(result.agent)
+            return res.status(200).json({
+                data,
+                agentUsed: result.agent
+            });
         }
         return res.status(500).json(error);
 

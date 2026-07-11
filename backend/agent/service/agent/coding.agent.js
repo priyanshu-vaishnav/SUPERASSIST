@@ -10,7 +10,7 @@ const codingAgent = async (state) => {
         }
     }
     try {
-        const llm = await LLM_MODEL("extended")
+        const llm = await LLM_MODEL("basic")
         const systemPrompt = "You are an Coding Expert , Help user by Understading theri prompt and give'em code or whatever the user wants"
         const messages = [
             { role: "system", content: systemPrompt },
