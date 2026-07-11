@@ -9,7 +9,7 @@ const chatAgent = async (state) => {
             };
         }
 
-        const llm = await LLM_MODEL("extended");
+        const llm = await LLM_MODEL("basic");
 
         const systemPrompt = "You are a helpful AI assistant. Respond clearly and concisely, matching the user's tone and language (Hindi/English mix if they use it).";
 

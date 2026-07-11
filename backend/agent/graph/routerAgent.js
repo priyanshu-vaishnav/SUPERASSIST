@@ -3,7 +3,7 @@ const LLM_MODEL = require("../config/LLM")
 
 const routerAgent = async (state) => {
 
-    const model = await LLM_MODEL("extended")
+    const model = await LLM_MODEL("basic")
     const Prompt = `You are a Router Agent. Your job is to analyze the user's query and decide which specialized agent should handle it.
 
 AVAILABLE AGENTS:
