@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import "./Sidebar.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,6 +8,7 @@ import {
 } from "../../redux/api/chatApi";
 import { useEffect } from "react";
 import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
+import { useNavigate } from "react-router";
 
 function Sidebar() {
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
@@ -23,14 +24,15 @@ function Sidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeView, setActiveView] = useState("chats");
   const [deletingId, setDeletingId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (data?.data) {
       dispatch(setChatMessages(data.data));
     }
     refetch()
-   
-  }, [data, dispatch,chatId]);
+
+  }, [data, dispatch, chatId]);
 
   // Filtered chats based on search
   const filteredChats = useMemo(() => {
@@ -99,16 +101,15 @@ function Sidebar() {
   const renderChatItem = (chat) => {
     const title =
       chat.messages?.[0]?.message?.slice(0, 40) +
-        (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
+      (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
       chat.title ||
       "New Chat";
 
     return (
       <div
         key={chat.id}
-        className={`chat-item ${chatId === chat.id ? "active" : ""} ${
-          deletingId === chat.id ? "deleting" : ""
-        }`}
+        className={`chat-item ${chatId === chat.id ? "active" : ""} ${deletingId === chat.id ? "deleting" : ""
+          }`}
         onClick={() => handleSelectChat(chat.id)}
       >
         <div className="chat-item-icon">
@@ -165,6 +166,38 @@ function Sidebar() {
     );
   };
 
+  const handleMenuOptions = (option) => {
+
+    console.log(option)
+    if (option === "Settings") {
+      navigate("/settings")
+    }
+    setIsOpen(false)
+
+  }
+
+
+
+
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const settingsOptions = [
+    
+    { icon: '⚙️', label: 'Settings' },
+    { icon: '🚪', label: 'Logout' },
+  ];
+
   const totalChats = data?.data?.length || 0;
 
   return (
@@ -192,9 +225,8 @@ function Sidebar() {
       />
 
       <aside
-        className={`sidebar ${isOpen ? "open" : ""} ${
-          isCollapsed ? "collapsed" : ""
-        }`}
+        className={`sidebar ${isOpen ? "open" : ""} ${isCollapsed ? "collapsed" : ""
+          }`}
       >
         {/* Header */}
         <div className="sidebar-header">
@@ -340,9 +372,8 @@ function Sidebar() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                className={`collapsed-tab ${
-                  activeView === tab.id ? "active" : ""
-                }`}
+                className={`collapsed-tab ${activeView === tab.id ? "active" : ""
+                  }`}
                 onClick={() => setActiveView(tab.id)}
                 title={tab.id}
               >
@@ -449,15 +480,37 @@ function Sidebar() {
                 </span>
               </div>
             )}
-            {!isCollapsed && (
-              <button className="user-menu-btn" title="Menu">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="5" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="19" r="1.5" fill="currentColor" />
-                </svg>
-              </button>
-            )}
+            <div className="user-menu-container" ref={menuRef}>
+              {!isCollapsed && (
+                <button
+                  className="user-menu-btn"
+                  title="Menu"
+                  onClick={() => setIsOpen(!isOpen)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+                  </svg>
+                </button>
+              )}
+
+              {isOpen && (
+                <div className="settings-bar">
+                  <div className="settings-header">Settings</div>
+                  {settingsOptions.map((option, index) => (
+                    <button
+                      key={index}
+                      className="settings-item"
+                      onClick={() => handleMenuOptions(option.label)}
+                    >
+                      <span className="settings-icon">{option.icon}</span>
+                      <span className="settings-label">{(option.label).toLowerCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </aside>

@@ -13,7 +13,7 @@ async function LLM_MODEL(agent) {
             temperature: 0,
             baseUrl: "https://ollama.com",
             headers: {
-                Authorization: `Bearer ${OLLAMA_API_KEY}`,
+                Authorization: `Bearer 158b179c06c543e38e565ae8f1e766b3.pTcBdfMtKuqP_fxYGH7t6dOt`,
             },
             streaming: true,
         });

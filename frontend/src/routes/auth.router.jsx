@@ -3,6 +3,7 @@ import SignUp from "../components/auth/SignUp"
 import SignIn from "../components/auth/SignIn"
 import Protection from "../components/protect/Protection"
 import Dashboard from "../components/main/Dashboard"
+import Setting from "../components/settings/Setting"
 
 const route = createBrowserRouter([
     {
@@ -18,6 +19,13 @@ const route = createBrowserRouter([
     {
         path: "/signin",
         element: <SignIn />
+    },{
+        path:'/settings',
+        element:
+        (<Protection>
+
+            <Setting/>
+        </Protection>)
     }
     
 ])

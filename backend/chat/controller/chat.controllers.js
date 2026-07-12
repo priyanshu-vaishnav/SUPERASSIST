@@ -82,6 +82,7 @@ async function sendMessage(req, res) {
             { role: "ai", message: ai_response },
         ];
 
+        
         const updatedMessages = [...oldMessages, ...newMessages];
 
 
@@ -106,8 +107,8 @@ async function sendMessage(req, res) {
 }
 
 async function deleteSingleChat(req, res) {
-    const  {chatId ,id} = req.body
-    console.log(chatId)
+    const { chatId, id } = req.body
+    
 
     const { data, error } = await supabaseAdmin.from("chats").delete().eq("id", chatId).single()
     if (!error) {
@@ -121,4 +122,4 @@ async function deleteSingleChat(req, res) {
 
 }
 
-module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat ,deleteSingleChat}
+module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat, deleteSingleChat }

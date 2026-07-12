@@ -6,4 +6,4 @@ const chatMessages = [
     const newMessge = {role:"human",message:"jooo"}
     const updatedMessage = [...chatMessages,newMessge]
 
-    console.log(updatedMessage)
+    

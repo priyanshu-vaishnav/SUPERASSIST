@@ -1,17 +1,37 @@
 const graph = require("../graph/graph");
-const { supabase, supabaseAdmin } = require('../config/supabase')
+const { supabase, supabaseAdmin } = require('../config/supabase');
+const redis = require("../../shared/redis");
 
 
 const chatController = async (req, res) => {
 
-    
+
 
     const userId = req.userId;
     const { chatId, humanMessage } = req.body;
 
-    console.log(chatId,humanMessage)
+    /**
+     * if the user exists than fetch there previous message otherwise insert first message on it
+     */
+    let agent_Memory = "";
+    const isExists = redis.exists(`chat-${userId}`) 
+    if (isExists) {
 
-    // Cleaned up validation & fixed the .status(400) typo
+        const raw_previousConversations = await redis.get(`chat-${userId}`)
+      
+        agent_Memory = JSON.parse(raw_previousConversations)
+       
+
+    } else {
+
+
+        agent_Memory = { role: "human", message: humanMessage }
+
+
+    }
+
+
+
     if (!chatId || !humanMessage || !humanMessage.trim()) {
         return res.status(400).json({
             message: "bad request: chatId and humanMessage are required"
@@ -21,15 +41,14 @@ const chatController = async (req, res) => {
     const prompt = "";
     try {
         const initialState = {
-            prompt: humanMessage.trim()
+            prompt: humanMessage.trim(),
+            agentMemory: agent_Memory
         };
 
         const result = await graph.invoke(initialState);
 
 
-console.log("step-2")
-
-        // 1. Pehle existing messages fetch karo
+    
         const { data: existingChat, error: fetchError } = await supabaseAdmin
             .from("chats")
             .select("messages")
@@ -40,16 +59,17 @@ console.log("step-2")
             return res.status(500).json(fetchError);
         }
 
-
         const oldMessages = existingChat?.messages || [];
         const newMessages = [
             { role: "human", message: humanMessage },
             { role: "ai", message: result.aiResponse },
         ];
 
+
+        //if the user is new than we adding countinusly old + new messages
+        const updated_agent_memory = [agent_Memory, ...newMessages]
+        await redis.set(`chat-${userId}`, JSON.stringify(updated_agent_memory), "EX", 3600 * 24)
         const updatedMessages = [...oldMessages, ...newMessages];
-
-
 
 
         const { data, error } = await supabaseAdmin
@@ -59,7 +79,7 @@ console.log("step-2")
             .select();
 
         if (!error) {
-            console.log(result.agent)
+
             return res.status(200).json({
                 data,
                 agentUsed: result.agent
