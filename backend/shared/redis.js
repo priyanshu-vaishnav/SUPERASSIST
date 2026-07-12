@@ -1,13 +1,16 @@
+require("dotenv").config({path:"../.env"})
 const { Redis } = require("ioredis")
 const express = require("express")
 const axios = require("axios")
 const { supabase, supabaseAdmin } = require("../agent/config/supabase")
 const app = express()
+
+console.log(process.env.REDIS_HOST)
 const redis = new Redis({
-    username: 'default',
-    password: '6Hj9SlwOBCLJh0kZpzBz7dBVf5ypRrEs',
-    host: 'speedy-spot-daughter-11039.db.redis.io',
-    port: 10801
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
 
 })
 redis.on("connect", () => console.log("redis connected"))
