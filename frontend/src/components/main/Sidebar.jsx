@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import "./Sidebar.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,6 +8,9 @@ import {
 } from "../../redux/api/chatApi";
 import { useEffect } from "react";
 import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
+import { useNavigate } from "react-router";
+import { getToken } from "../../redux/slices/user.slice";
+
 
 function Sidebar() {
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
@@ -16,6 +19,7 @@ function Sidebar() {
 
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
+  const userTokenUsed = useSelector((state) => state.user.token)
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -23,14 +27,29 @@ function Sidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeView, setActiveView] = useState("chats");
   const [deletingId, setDeletingId] = useState(null);
+  const navigate = useNavigate();
+  
+
+  // 👇 Token Usage State — you'll manage the logic
+
+  const [showTokenDetails, setShowTokenDetails] = useState(false);
 
   useEffect(() => {
     if (data?.data) {
+
+
+      dispatch(getToken(data.TOKEN_USED))
       dispatch(setChatMessages(data.data));
     }
     refetch()
-   
-  }, [data, dispatch,chatId]);
+  }, [data, dispatch, chatId]);
+
+  const tokenUsage = {
+
+    used: userTokenUsed,       
+    total: 10000,     
+    period: "month", 
+  }
 
   // Filtered chats based on search
   const filteredChats = useMemo(() => {
@@ -66,6 +85,24 @@ function Sidebar() {
     return { today, yesterday, lastWeek, older };
   }, [filteredChats]);
 
+  // 👇 Token Usage calculations — derived from state
+  const tokenStats = useMemo(() => {
+    const { used, total } = tokenUsage;
+   
+    const percentage = total > 0 ? Math.min((used / total) * 100, 100) : 0;
+    const remaining = Math.max(total - used, 0);
+    let status = "safe"; // safe | warning | critical
+    if (percentage >= 90) status = "critical";
+    else if (percentage >= 70) status = "warning";
+    return { percentage, remaining, status };
+  }, [tokenUsage,userTokenUsed]);
+
+  const formatTokens = (n) => {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
+    return n.toString();
+  };
+
   const handleNewChat = async () => {
     try {
       await createUserChat().unwrap();
@@ -96,19 +133,19 @@ function Sidebar() {
     setIsOpen(false);
   };
 
+
   const renderChatItem = (chat) => {
     const title =
       chat.messages?.[0]?.message?.slice(0, 40) +
-        (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
+      (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
       chat.title ||
       "New Chat";
 
     return (
       <div
         key={chat.id}
-        className={`chat-item ${chatId === chat.id ? "active" : ""} ${
-          deletingId === chat.id ? "deleting" : ""
-        }`}
+        className={`chat-item ${chatId === chat.id ? "active" : ""} ${deletingId === chat.id ? "deleting" : ""
+          }`}
         onClick={() => handleSelectChat(chat.id)}
       >
         <div className="chat-item-icon">
@@ -165,6 +202,32 @@ function Sidebar() {
     );
   };
 
+  const handleMenuOptions = (option) => {
+    
+    if (option === "Settings") {
+      navigate("/settings")
+    }
+    setIsOpen(false)
+  }
+
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const settingsOptions = [
+    { icon: '⚙️', label: 'Settings' },
+    { icon: '🚪', label: 'Logout' },
+  ];
+
   const totalChats = data?.data?.length || 0;
 
   return (
@@ -192,9 +255,8 @@ function Sidebar() {
       />
 
       <aside
-        className={`sidebar ${isOpen ? "open" : ""} ${
-          isCollapsed ? "collapsed" : ""
-        }`}
+        className={`sidebar ${isOpen ? "open" : ""} ${isCollapsed ? "collapsed" : ""
+          }`}
       >
         {/* Header */}
         <div className="sidebar-header">
@@ -340,9 +402,8 @@ function Sidebar() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                className={`collapsed-tab ${
-                  activeView === tab.id ? "active" : ""
-                }`}
+                className={`collapsed-tab ${activeView === tab.id ? "active" : ""
+                  }`}
                 onClick={() => setActiveView(tab.id)}
                 title={tab.id}
               >
@@ -431,6 +492,86 @@ function Sidebar() {
           )}
         </div>
 
+        {/* 🆕 Token Usage Section */}
+        {!isCollapsed ? (
+          <div className={`token-usage-section ${tokenStats.status}`}>
+            <div
+              className="token-usage-header"
+              onClick={() => setShowTokenDetails(!showTokenDetails)}
+            >
+              <div className="token-usage-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Token Usage</span>
+                <span className="period-badge">{tokenUsage.period}</span>
+              </div>
+              <span className="token-percentage">
+                {tokenStats.percentage.toFixed(0)}%
+              </span>
+            </div>
+
+            <div className="token-progress-track">
+              <div
+                className="token-progress-fill"
+                style={{ width: `${tokenStats.percentage}%` }}
+              />
+            </div>
+
+            {showTokenDetails && (
+              <div className="token-usage-details">
+                <div className="token-stat">
+                  <span className="token-stat-label">Used</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenUsage.used)}
+                  </span>
+                </div>
+                <div className="token-stat">
+                  <span className="token-stat-label">Remaining</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenStats.remaining)}
+                  </span>
+                </div>
+                <div className="token-stat">
+                  <span className="token-stat-label">Total</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenUsage.total)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Collapsed view — just a small circular indicator
+          <div
+            className={`token-usage-collapsed ${tokenStats.status}`}
+            title={`${tokenStats.percentage.toFixed(0)}% used`}
+          >
+            <svg viewBox="0 0 36 36" className="token-circle">
+              <path
+                className="token-circle-bg"
+                d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32"
+              />
+              <path
+                className="token-circle-fill"
+                d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32"
+                style={{
+                  strokeDasharray: `${tokenStats.percentage}, 100`,
+                }}
+              />
+            </svg>
+            <span className="token-circle-text">
+              {tokenStats.percentage.toFixed(0)}
+            </span>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="sidebar-footer">
           <div className={`user-card ${isCollapsed ? "collapsed" : ""}`}>
@@ -449,15 +590,37 @@ function Sidebar() {
                 </span>
               </div>
             )}
-            {!isCollapsed && (
-              <button className="user-menu-btn" title="Menu">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="5" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="19" r="1.5" fill="currentColor" />
-                </svg>
-              </button>
-            )}
+            <div className="user-menu-container" ref={menuRef}>
+              {!isCollapsed && (
+                <button
+                  className="user-menu-btn"
+                  title="Menu"
+                  onClick={() => setIsOpen(!isOpen)}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+                  </svg>
+                </button>
+              )}
+
+              {isOpen && (
+                <div className="settings-bar">
+                  <div className="settings-header">Settings</div>
+                  {settingsOptions.map((option, index) => (
+                    <button
+                      key={index}
+                      className="settings-item"
+                      onClick={() => handleMenuOptions(option.label)}
+                    >
+                      <span className="settings-icon">{option.icon}</span>
+                      <span className="settings-label">{(option.label).toLowerCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </aside>

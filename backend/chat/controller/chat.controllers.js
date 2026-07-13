@@ -1,3 +1,4 @@
+const redis = require('../../shared/redis.js')
 const { supabase, supabaseAdmin } = require('../config/supabase.js')
 const { runAgent } = require('../services/chatService.js')
 const axios = require('axios')
@@ -25,10 +26,12 @@ async function createChat(req, res) {
 async function fetchChats(req, res) {
 
     const userId = req.userId
+    let TOKEN_USED = await redis.get(`token-${userId}`)
     const { data, error } = await supabaseAdmin.from("chats").select("*").eq("user_id", userId).order("created_at", { ascending: false });
     if (!error) {
         return res.status(200).json({
-            data
+            data,
+            TOKEN_USED
         })
     }
     return res.status(500).json(error)
@@ -82,6 +85,7 @@ async function sendMessage(req, res) {
             { role: "ai", message: ai_response },
         ];
 
+        
         const updatedMessages = [...oldMessages, ...newMessages];
 
 
@@ -106,8 +110,8 @@ async function sendMessage(req, res) {
 }
 
 async function deleteSingleChat(req, res) {
-    const  {chatId ,id} = req.body
-    console.log(chatId)
+    const { chatId, id } = req.body
+    
 
     const { data, error } = await supabaseAdmin.from("chats").delete().eq("id", chatId).single()
     if (!error) {
@@ -121,4 +125,4 @@ async function deleteSingleChat(req, res) {
 
 }
 
-module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat ,deleteSingleChat}
+module.exports = { fetchChats, createChat, sendMessage, fetchSingleChat, deleteSingleChat }

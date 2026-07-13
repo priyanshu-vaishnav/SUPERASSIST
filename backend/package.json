@@ -1,11 +1,36 @@
 {
+
+  "scripts": {
+
+    "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"npx nodemon auth/server.js\" \"npx nodemon chat/server.js\" \"npx nodemon agent/server.js\" \"npx nodemon gateway/server.js\""
+
+  },
+
   "dependencies": {
+
     "cookie-parser": "^1.4.7",
+
     "cors": "^2.8.6",
+
     "dotenv": "^17.4.2",
+
     "express": "^5.2.1",
+
     "express-http-proxy": "^2.1.2",
+
+    "ioredis": "^5.11.1",
+
     "mongoose": "^9.7.4",
+
     "nodemon": "^3.1.14"
+
+  },
+
+  "devDependencies": {
+
+    "concurrently": "^10.0.3"
+
   }
+
 }
+

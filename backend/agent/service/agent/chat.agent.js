@@ -11,13 +11,18 @@ const chatAgent = async (state) => {
 
         const llm = await LLM_MODEL("basic");
 
-        const systemPrompt = "You are a helpful AI assistant. Respond clearly and concisely, matching the user's tone and language (Hindi/English mix if they use it).";
+        const systemPrompt = `You are a helpful AI assistant.
+         Respond clearly and concisely, 
+         matching the user's tone and language (Hindi/English mix if they use it) ,
+          and you also have memory of a previous conversations so response according to it
+          agentMemory:${JSON.stringify(state.agentMemory)} `;
 
         const messages = [
             { role: "system", content: systemPrompt },
             { role: "human", content: state.prompt }
         ];
 
+       
         const response = await llm.invoke(messages);
 
         return {
