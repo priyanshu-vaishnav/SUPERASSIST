@@ -28,7 +28,7 @@ function Sidebar() {
   const [activeView, setActiveView] = useState("chats");
   const [deletingId, setDeletingId] = useState(null);
   const navigate = useNavigate();
-  
+
 
   // 👇 Token Usage State — you'll manage the logic
 
@@ -44,12 +44,13 @@ function Sidebar() {
     refetch()
   }, [data, dispatch, chatId]);
 
-  const tokenUsage = {
 
-    used: userTokenUsed,       
-    total: 10000,     
-    period: "month", 
+  const tokenUsage = {
+    used: userTokenUsed,
+    total: 50000,
+    period: "month",
   }
+
 
   // Filtered chats based on search
   const filteredChats = useMemo(() => {
@@ -88,14 +89,14 @@ function Sidebar() {
   // 👇 Token Usage calculations — derived from state
   const tokenStats = useMemo(() => {
     const { used, total } = tokenUsage;
-   
+
     const percentage = total > 0 ? Math.min((used / total) * 100, 100) : 0;
     const remaining = Math.max(total - used, 0);
     let status = "safe"; // safe | warning | critical
     if (percentage >= 90) status = "critical";
     else if (percentage >= 70) status = "warning";
     return { percentage, remaining, status };
-  }, [tokenUsage,userTokenUsed]);
+  }, [tokenUsage, userTokenUsed]);
 
   const formatTokens = (n) => {
     if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
@@ -203,7 +204,7 @@ function Sidebar() {
   };
 
   const handleMenuOptions = (option) => {
-    
+
     if (option === "Settings") {
       navigate("/settings")
     }

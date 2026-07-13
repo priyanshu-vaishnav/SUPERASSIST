@@ -15,7 +15,7 @@ const chatController = async (req, res) => {
     token_Usage = await redis.get(`token-${userId}`)
     console.log(token_Usage)
 
-    if (token_Usage >= 10000) {
+    if (token_Usage >= 50000) {
         console.log("overused token")
       
         return res.status(500).json({

@@ -75,7 +75,7 @@ function Chatsection() {
         ...prev,
         {
           role: "ai",
-          message: error?.data.TOKEN_USED > 2000 ? "Token overused please upgrade your plan" : "⚠️ Something went wrong. Please try again.",
+          message: error?.data.TOKEN_USED > 10000 ? "Token overused please upgrade your plan" : "⚠️ Something went wrong. Please try again.",
           isError: true,
         },
       ]);
