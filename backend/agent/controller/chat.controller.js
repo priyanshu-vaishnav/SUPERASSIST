@@ -6,31 +6,38 @@ const redis = require("../../shared/redis");
 const chatController = async (req, res) => {
 
 
-
     const userId = req.userId;
     const { chatId, humanMessage } = req.body;
 
-    /**
-     * if the user exists than fetch there previous message otherwise insert first message on it
-     */
-    let agent_Memory = "";
-    const isExists = redis.exists(`chat-${userId}`) 
-    if (isExists) {
+    let agent_Memory = [];
+    let token_Usage = 0;
 
-        const raw_previousConversations = await redis.get(`chat-${userId}`)
+    token_Usage = await redis.get(`token-${userId}`)
+    console.log(token_Usage)
+
+    if (token_Usage >= 10000) {
+        console.log("overused token")
       
-        agent_Memory = JSON.parse(raw_previousConversations)
-       
-
-    } else {
-
-
-        agent_Memory = { role: "human", message: humanMessage }
-
-
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while processing your request.",
+            TOKEN_USED: token_Usage
+        });
     }
 
+    const isExists = await redis.exists(`chat-${userId}`); // NOTE: await missing tha yahan bhi!
 
+    if (isExists) {
+        const raw_previousConversations = await redis.get(`chat-${userId}`);
+        agent_Memory = JSON.parse(raw_previousConversations);
+
+
+        if (!Array.isArray(agent_Memory)) {
+            agent_Memory = [];
+        }
+    } else {
+        agent_Memory = [];
+    }
 
     if (!chatId || !humanMessage || !humanMessage.trim()) {
         return res.status(400).json({
@@ -38,17 +45,22 @@ const chatController = async (req, res) => {
         });
     }
 
-    const prompt = "";
+
+
+
     try {
+        // Sirf last 6 messages bhejo agent ko (poori history nahi)
+        const recentMemory = agent_Memory.slice(-6);
+
         const initialState = {
             prompt: humanMessage.trim(),
-            agentMemory: agent_Memory
+            agentMemory: recentMemory
         };
 
         const result = await graph.invoke(initialState);
 
 
-    
+
         const { data: existingChat, error: fetchError } = await supabaseAdmin
             .from("chats")
             .select("messages")
@@ -59,18 +71,30 @@ const chatController = async (req, res) => {
             return res.status(500).json(fetchError);
         }
 
+        //setting token usage for the user 
+        const total_token_usage = (Number(token_Usage) + result.aiResponse.length);
+        await redis.set(`token-${userId}`, total_token_usage)
+
+        
+
+
         const oldMessages = existingChat?.messages || [];
         const newMessages = [
             { role: "human", message: humanMessage },
             { role: "ai", message: result.aiResponse },
         ];
 
+        // Ab flat array me hi add hoga, wrap nahi hoga
+        const updated_agent_memory = [...agent_Memory, ...newMessages];
 
-        //if the user is new than we adding countinusly old + new messages
-        const updated_agent_memory = [agent_Memory, ...newMessages]
-        await redis.set(`chat-${userId}`, JSON.stringify(updated_agent_memory), "EX", 3600 * 24)
+        await redis.set(
+            `chat-${userId}`,
+            JSON.stringify(updated_agent_memory),
+            "EX",
+            3600 * 24
+        );
+
         const updatedMessages = [...oldMessages, ...newMessages];
-
 
         const { data, error } = await supabaseAdmin
             .from("chats")
@@ -80,19 +104,21 @@ const chatController = async (req, res) => {
 
         if (!error) {
 
+            console.log(result.agent)
             return res.status(200).json({
                 data,
-                agentUsed: result.agent
+                agentUsed: result.agent,
+              TOKEN_USED :token_Usage
             });
         }
         return res.status(500).json(error);
 
-    }
-    catch (err) {
+    } catch (err) {
         console.error("chatController error:", err);
         return res.status(500).json({
             success: false,
-            message: "Something went wrong while processing your request."
+            message: "Something went wrong while processing your request.",
+            TOKEN_USED: token_Usage
         });
     }
 };

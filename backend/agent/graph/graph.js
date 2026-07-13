@@ -2,7 +2,7 @@ const { StateGraph } = require("@langchain/langgraph");
 const agentState = require("./state");
 const routerAgent = require("./routerAgent.js");
 const chatAgent = require("../service/agent/chat.agent");   // ← add
-const searchAgent = require("../service/agent/search.agent");
+const searchAgent = require("../service/agent/search.agent.js");
 const codingAgent = require("../service/agent/coding.agent");
 const visionAgent = require("../service/agent/vision.agent");
 const pdfAgent = require("../service/agent/pdf.agent");
@@ -39,7 +39,7 @@ workflow.addConditionalEdges(
   }
 );
 
-workflow.addEdge("search", "chat");
+workflow.addEdge("search", "__end__");
 workflow.addEdge("chat", "__end__");   // ← add, chat had no exit
 workflow.addEdge("code", "__end__");
 workflow.addEdge("pdf", "__end__");

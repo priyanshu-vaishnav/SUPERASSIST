@@ -9,6 +9,8 @@ import {
 import { useEffect } from "react";
 import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
 import { useNavigate } from "react-router";
+import { getToken } from "../../redux/slices/user.slice";
+
 
 function Sidebar() {
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
@@ -17,6 +19,7 @@ function Sidebar() {
 
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
+  const userTokenUsed = useSelector((state) => state.user.token)
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -25,14 +28,28 @@ function Sidebar() {
   const [activeView, setActiveView] = useState("chats");
   const [deletingId, setDeletingId] = useState(null);
   const navigate = useNavigate();
+  
+
+  // 👇 Token Usage State — you'll manage the logic
+
+  const [showTokenDetails, setShowTokenDetails] = useState(false);
 
   useEffect(() => {
     if (data?.data) {
+
+
+      dispatch(getToken(data.TOKEN_USED))
       dispatch(setChatMessages(data.data));
     }
     refetch()
-
   }, [data, dispatch, chatId]);
+
+  const tokenUsage = {
+
+    used: userTokenUsed,       
+    total: 10000,     
+    period: "month", 
+  }
 
   // Filtered chats based on search
   const filteredChats = useMemo(() => {
@@ -68,6 +85,24 @@ function Sidebar() {
     return { today, yesterday, lastWeek, older };
   }, [filteredChats]);
 
+  // 👇 Token Usage calculations — derived from state
+  const tokenStats = useMemo(() => {
+    const { used, total } = tokenUsage;
+   
+    const percentage = total > 0 ? Math.min((used / total) * 100, 100) : 0;
+    const remaining = Math.max(total - used, 0);
+    let status = "safe"; // safe | warning | critical
+    if (percentage >= 90) status = "critical";
+    else if (percentage >= 70) status = "warning";
+    return { percentage, remaining, status };
+  }, [tokenUsage,userTokenUsed]);
+
+  const formatTokens = (n) => {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
+    return n.toString();
+  };
+
   const handleNewChat = async () => {
     try {
       await createUserChat().unwrap();
@@ -97,6 +132,7 @@ function Sidebar() {
     dispatch(setChatId(id));
     setIsOpen(false);
   };
+
 
   const renderChatItem = (chat) => {
     const title =
@@ -167,17 +203,12 @@ function Sidebar() {
   };
 
   const handleMenuOptions = (option) => {
-
-    console.log(option)
+    
     if (option === "Settings") {
       navigate("/settings")
     }
     setIsOpen(false)
-
   }
-
-
-
 
   const menuRef = useRef(null);
 
@@ -193,7 +224,6 @@ function Sidebar() {
   }, []);
 
   const settingsOptions = [
-    
     { icon: '⚙️', label: 'Settings' },
     { icon: '🚪', label: 'Logout' },
   ];
@@ -461,6 +491,86 @@ function Sidebar() {
             </div>
           )}
         </div>
+
+        {/* 🆕 Token Usage Section */}
+        {!isCollapsed ? (
+          <div className={`token-usage-section ${tokenStats.status}`}>
+            <div
+              className="token-usage-header"
+              onClick={() => setShowTokenDetails(!showTokenDetails)}
+            >
+              <div className="token-usage-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Token Usage</span>
+                <span className="period-badge">{tokenUsage.period}</span>
+              </div>
+              <span className="token-percentage">
+                {tokenStats.percentage.toFixed(0)}%
+              </span>
+            </div>
+
+            <div className="token-progress-track">
+              <div
+                className="token-progress-fill"
+                style={{ width: `${tokenStats.percentage}%` }}
+              />
+            </div>
+
+            {showTokenDetails && (
+              <div className="token-usage-details">
+                <div className="token-stat">
+                  <span className="token-stat-label">Used</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenUsage.used)}
+                  </span>
+                </div>
+                <div className="token-stat">
+                  <span className="token-stat-label">Remaining</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenStats.remaining)}
+                  </span>
+                </div>
+                <div className="token-stat">
+                  <span className="token-stat-label">Total</span>
+                  <span className="token-stat-value">
+                    {formatTokens(tokenUsage.total)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Collapsed view — just a small circular indicator
+          <div
+            className={`token-usage-collapsed ${tokenStats.status}`}
+            title={`${tokenStats.percentage.toFixed(0)}% used`}
+          >
+            <svg viewBox="0 0 36 36" className="token-circle">
+              <path
+                className="token-circle-bg"
+                d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32"
+              />
+              <path
+                className="token-circle-fill"
+                d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32"
+                style={{
+                  strokeDasharray: `${tokenStats.percentage}, 100`,
+                }}
+              />
+            </svg>
+            <span className="token-circle-text">
+              {tokenStats.percentage.toFixed(0)}
+            </span>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="sidebar-footer">

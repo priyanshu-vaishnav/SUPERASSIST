@@ -3,14 +3,18 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./Chatsection.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSendMessageMutation } from "../../redux/api/chatApi";
+import { getToken } from "../../redux/slices/user.slice";
 
 function Chatsection() {
   const [sendMessage, { isLoading }] = useSendMessageMutation();
   const allChats = useSelector((state) => state.chat.chatMessage);
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
+  const token = useSelector((state) => state.user.token)
+  const dispatch = useDispatch();
+
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
@@ -61,16 +65,17 @@ function Chatsection() {
     try {
       setIsTyping(true);
       const response = await sendMessage({ chatId, humanMessage: text }).unwrap();
+      dispatch(getToken(response.TOKEN_USED))
       const aiReply =
         response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
       setMessages((prev) => [...prev, { role: "ai", message: aiReply }]);
     } catch (error) {
-      console.error("Failed to send message:", error);
+      console.error("Failed to send message:", error?.data.TOKEN_USED);
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          message: "⚠️ Something went wrong. Please try again.",
+          message: error?.data.TOKEN_USED > 2000 ? "Token overused please upgrade your plan" : "⚠️ Something went wrong. Please try again.",
           isError: true,
         },
       ]);
@@ -143,8 +148,8 @@ function Chatsection() {
         </div>
 
         <div className="topbar-right">
-         
-          
+
+
           <button className="topbar-action" title="Search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />

@@ -34,16 +34,18 @@ Return ONLY a ONE WORD in this exact shape type :
 Do not add any text before or after the JSON. Do not explain your reasoning.
 
 USER PROMPT IS:${state.prompt}
-AGENT MEMORY IS:${state.agentMemory}
+
 `;
 
 
     const response = await model.invoke(Prompt)
 
+    console.log(response.content)
+
     return {
         ...state,
         agent: response.content.trim().toLowerCase(),
-        
+
     }
 
 

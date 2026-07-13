@@ -1,3 +1,4 @@
+const redis = require('../../shared/redis.js')
 const { supabase, supabaseAdmin } = require('../config/supabase.js')
 const { runAgent } = require('../services/chatService.js')
 const axios = require('axios')
@@ -25,10 +26,12 @@ async function createChat(req, res) {
 async function fetchChats(req, res) {
 
     const userId = req.userId
+    let TOKEN_USED = await redis.get(`token-${userId}`)
     const { data, error } = await supabaseAdmin.from("chats").select("*").eq("user_id", userId).order("created_at", { ascending: false });
     if (!error) {
         return res.status(200).json({
-            data
+            data,
+            TOKEN_USED
         })
     }
     return res.status(500).json(error)
