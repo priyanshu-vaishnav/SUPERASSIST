@@ -8,6 +8,7 @@ import { useSendMessageMutation } from "../../redux/api/chatApi";
 import { getToken } from "../../redux/slices/user.slice";
 
 function Chatsection() {
+  console.log("Chatsection rendered")
   const [sendMessage, { isLoading }] = useSendMessageMutation();
   const allChats = useSelector((state) => state.chat.chatMessage);
   const chatId = useSelector((state) => state.chat.chatId);
@@ -18,6 +19,8 @@ function Chatsection() {
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
+  
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -48,6 +51,26 @@ function Chatsection() {
     }
   };
 
+
+   const fileInputRef = useRef(null);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log("file selected",file)
+      setSelectedFile(file);
+    }
+  };
+
+  const removeFile = (e) => {
+    e.stopPropagation(); // Click event ko aage badhne se rokne ke liye
+    setSelectedFile(null);
+    // Input ko reset karna zaroori hai, varna same file dubara select nahi hogi
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
     const text = inputText.trim();
@@ -58,13 +81,21 @@ function Chatsection() {
       message: text,
     };
 
+    let sfile = selectedFile
+
+    console.log("joo")
+    console.log(sfile)
+
     setMessages((prev) => [...prev, userMsg]);
     setInputText("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
+
     try {
+    console.log("joo")
+
       setIsTyping(true);
-      const response = await sendMessage({ chatId, humanMessage: text }).unwrap();
+      const response = await sendMessage({ chatId, humanMessage: text,sfile}).unwrap();
       dispatch(getToken(response.TOKEN_USED))
       const aiReply =
         response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
@@ -116,6 +147,9 @@ function Chatsection() {
       minute: "2-digit",
     });
   };
+
+
+ 
 
   return (
     <div className="chat-shell">
@@ -244,17 +278,35 @@ function Chatsection() {
       {/* Input */}
       <form onSubmit={handleSubmit} className="composer">
         <div className="composer-inner">
-          <button type="button" className="composer-icon" title="Attach file">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        accept=".pdf"
+      />
+
+      {/* Logic: Agar file hai toh preview dikhao, varna attach button */}
+      {selectedFile ? (
+        <div className="file-preview-pill">
+          <span className="file-name" title={selectedFile.name}>
+            {selectedFile.name.length > 15 ? selectedFile.name.substring(0, 15) + "..." : selectedFile.name}
+          </span>
+          <button type="button" onClick={removeFile} className="remove-file-btn">
+            &times;
           </button>
+        </div>
+      ) : (
+        <button 
+          type="button" 
+          className="composer-icon" 
+          title="Attach file" 
+          onClick={() => fileInputRef.current.click()}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>)}
 
           <textarea
             ref={textareaRef}

@@ -29,12 +29,28 @@ export const chatApi = createApi({
                 method: 'GET',
             }),
         }),
-        sendMessage: builder.mutation({
-            query: ({ chatId, humanMessage }) => ({
-                url: "agent/api/chat",
-                method: "POST",
-                body: { chatId, humanMessage },
-            })
+       sendMessage: builder.mutation({
+            query: ({ chatId, humanMessage, sfile }) => {
+                // 1. FormData ka instance banayein
+                const formData = new FormData();
+                formData.append('chatId', chatId);
+                formData.append('humanMessage', humanMessage);
+
+                // Agar file hai toh use append karein
+                if (sfile) {
+                    formData.append('file', sfile);
+                }else{
+                    console.log("file not given")
+                }
+
+                return {
+                    url: "agent/api/chat",
+                    method: "POST",
+                    body: formData,
+                    formData: true, // Kuch versions mein ye zaruri hai, ya fir:
+                    
+                };
+            }
         })
 
     })

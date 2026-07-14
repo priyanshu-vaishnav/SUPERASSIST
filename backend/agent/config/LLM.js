@@ -34,6 +34,8 @@ async function LLM_MODEL(agent) {
 
     if (agent === "extended") {
         console.log("[System] Switching to CLOUD GOOGLE GEMINI...");
+
+        
         return new ChatGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_API_KEY, // .env se load hogi, hardcode mat karo
             model: "gemini-2.5-flash",

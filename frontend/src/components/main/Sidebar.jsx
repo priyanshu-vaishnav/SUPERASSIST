@@ -12,7 +12,11 @@ import { useNavigate } from "react-router";
 import { getToken } from "../../redux/slices/user.slice";
 
 
-function Sidebar() {
+function Sidebar() 
+
+{
+
+
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
   const [deleteUserChat, { isLoading: isDeleting }] = useDeleteUserChatMutation();
   const { data, refetch, isFetching } = useFetchUserChatQuery();
@@ -30,6 +34,7 @@ function Sidebar() {
   const navigate = useNavigate();
 
 
+  console.log("multiple render")
   // 👇 Token Usage State — you'll manage the logic
 
   const [showTokenDetails, setShowTokenDetails] = useState(false);
@@ -41,8 +46,8 @@ function Sidebar() {
       dispatch(getToken(data.TOKEN_USED))
       dispatch(setChatMessages(data.data));
     }
-    refetch()
-  }, [data, dispatch, chatId]);
+   
+  }, [chatId]);
 
 
   const tokenUsage = {
@@ -59,7 +64,7 @@ function Sidebar() {
     const query = searchQuery.toLowerCase();
     return data.data.filter((chat) => {
       const title =
-        chat.messages?.[0]?.message?.toLowerCase() || chat.title?.toLowerCase() || "";
+        chat.messages?.[0]?.message?.toLowerCase() || chat.title?.toLowerCase() || "Chat";
       return title.includes(query);
     });
   }, [data, searchQuery]);
@@ -161,7 +166,7 @@ function Sidebar() {
           </svg>
         </div>
         <div className="chat-item-content">
-          <p className="chat-item-title">{title}</p>
+          <p className="chat-item-title">{!title || title === "undefined" ? "chat" : title}</p>
           <span className="chat-item-date">
             {new Date(chat.created_at).toLocaleDateString("en-IN", {
               day: "numeric",
@@ -628,5 +633,9 @@ function Sidebar() {
     </>
   );
 }
+
+
+Sidebar.whyDidYouRender = true;
+
 
 export default Sidebar;

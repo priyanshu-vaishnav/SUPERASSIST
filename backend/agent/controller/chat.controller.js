@@ -9,15 +9,18 @@ const chatController = async (req, res) => {
     const userId = req.userId;
     const { chatId, humanMessage } = req.body;
 
+
+    
+
     let agent_Memory = [];
     let token_Usage = 0;
 
     token_Usage = await redis.get(`token-${userId}`)
-    console.log(token_Usage)
+   
 
-    if (token_Usage >= 50000) {
+    if (token_Usage >= 55000) {
         console.log("overused token")
-      
+
         return res.status(500).json({
             success: false,
             message: "Something went wrong while processing your request.",
@@ -46,7 +49,14 @@ const chatController = async (req, res) => {
     }
 
 
-
+    let promptWithFile = null
+    if (req.file) {
+      
+        promptWithFile = req.file
+    } else {
+       
+        promptWithFile = ""
+    }
 
     try {
         // Sirf last 6 messages bhejo agent ko (poori history nahi)
@@ -54,7 +64,8 @@ const chatController = async (req, res) => {
 
         const initialState = {
             prompt: humanMessage.trim(),
-            agentMemory: recentMemory
+            agentMemory: recentMemory,
+            promptWithFile: promptWithFile
         };
 
         const result = await graph.invoke(initialState);
@@ -75,7 +86,7 @@ const chatController = async (req, res) => {
         const total_token_usage = (Number(token_Usage) + result.aiResponse.length);
         await redis.set(`token-${userId}`, total_token_usage)
 
-        
+
 
 
         const oldMessages = existingChat?.messages || [];
@@ -104,11 +115,11 @@ const chatController = async (req, res) => {
 
         if (!error) {
 
-            console.log(result.agent)
+            
             return res.status(200).json({
                 data,
                 agentUsed: result.agent,
-              TOKEN_USED :token_Usage
+                TOKEN_USED: token_Usage
             });
         }
         return res.status(500).json(error);
