@@ -6,12 +6,10 @@ const app = require("./app/app.js"); // Ya jo bhi aapka express app instance hai
 
 // 🚀 LOCAL DEVELOPMENT
 // Agar local machine par chal raha hai, toh purani tarah port par listen karega
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(process.env.CHAT_PORT || 3002, () => {
-        console.log("ChatService running locally on port ", process.env.CHAT_PORT || 3002);
-    });
-}
+// Kisi condition par depend mat raho, direct listen chalao
+const CHAT_PORT = process.env.CHAT_PORT || 3002;
+app.listen(CHAT_PORT, '0.0.0.0', () => {
+    console.log(`[STRICT] Chat Service running on port ${CHAT_PORT}`);
+});
 
-// ☁️ VERCEL PRODUCTION
-// Vercel ke liye Express app instance ko export karna zaroori hai
 module.exports = app;

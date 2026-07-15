@@ -6,12 +6,10 @@ const app = require("./app/app.js")
 
 // 🚀 LOCAL DEVELOPMENT
 // Local machine par ye purani tarah port par listen karega
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(process.env.AGENT_PORT || 3003, () => {
-        console.log("Agent service running locally on port ", process.env.AGENT_PORT || 3003)
-    })
-}
+// Kisi condition par depend mat raho, direct listen chalao
+const AGENT_PORT = process.env.AGENT_PORT || 3003;
+app.listen(AGENT_PORT, '0.0.0.0', () => {
+    console.log(`[STRICT] Agent Service running on port ${AGENT_PORT}`);
+});
 
-// ☁️ VERCEL PRODUCTION
-// Vercel serverless function ke liye app export karna mandatory hai
 module.exports = app;
