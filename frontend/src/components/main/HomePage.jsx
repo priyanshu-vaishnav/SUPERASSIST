@@ -469,14 +469,7 @@ export default function HomePage() {
       {/* ============ HERO ============ */}
       <section className="nx-hero">
         <div className="nx-hero-content nx-reveal">
-          <div className="nx-hero-badge">
-            <span className="nx-badge-dot" />
-            <span>Now with SuperAssist Ultra — PhD-level reasoning</span>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </div>
+          
 
           <h1 className="nx-hero-title">
             Build the future with{' '}
@@ -497,12 +490,7 @@ export default function HomePage() {
                 <polyline points="12 5 19 12 12 19"/>
               </svg>
             </Link>
-            <a href="#docs" className="nx-btn nx-btn-outline nx-btn-lg">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              <span>Watch Demo</span>
-            </a>
+            
           </div>
 
           <div className="nx-hero-trust">
