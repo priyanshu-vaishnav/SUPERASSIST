@@ -19,7 +19,7 @@ function Sidebar() {
   const user = useSelector((state) => state.user.value);
   const userTokenUsed = useSelector((state) => state.user.token);
   const dispatch = useDispatch();
-
+console.log(user)
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -123,7 +123,8 @@ function Sidebar() {
     try {
       await deleteUserChat({ chatId: id, id }).unwrap();
       refetch();
-      if (chatId === id) dispatch(setChatId(null));
+      dispatch(setChatId(""));
+      localStorage.removeItem("chatId")
     } catch (err) {
       console.error("Failed to delete:", err);
     } finally {
@@ -651,7 +652,7 @@ function Sidebar() {
             {!isCollapsed && (
               <div className="user-meta">
                 <span className="user-name">
-                  {user?.username || user?.username || "User"}
+                  {user?.username || user?.username[0] || "User"}
                 </span>
                 <span className="user-plan">
                   <span className="plan-dot" />

@@ -6,6 +6,7 @@ import "./Chatsection.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useSendMessageMutation } from "../../redux/api/chatApi";
 import { getToken } from "../../redux/slices/user.slice";
+import { setChatId } from "../../redux/slices/chat.slice";
 
 function Chatsection() {
   const [sendMessage, { isLoading }] = useSendMessageMutation();
@@ -22,7 +23,7 @@ function Chatsection() {
   const [copySuccess, setCopySuccess] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  let chatIdSelection = ""
+  let chatSelection = ""
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -32,16 +33,12 @@ function Chatsection() {
   // Sync messages when chat changes
   useEffect(() => {
 
-    let c = localStorage.getItem("chatId")
-    if (!c) {
-      chatIdSelection = chatId
-    } else {
-      chatIdSelection = c
-    }
-
-    if (chatIdSelection) {
-      const ch = allChats?.filter((chat) => chat.id === chatIdSelection);
-      setMessages(ch?.[0]?.messages || []);
+    let savedChat = localStorage.getItem("chatId")
+    savedChat ? (dispatch(setChatId(savedChat))) : (chatSelection = chatId)
+    if (chatId) {
+      localStorage.setItem("chatId",chatId)
+      const c = allChats?.filter((chat) => chat.id === chatId);
+      setMessages(c?.[0]?.messages || []);
     } else {
       setMessages([]);
     }
