@@ -153,6 +153,7 @@ try {
     const newChatId = response.data.id; // Yahan seedha ID milega
     
     dispatch(setChatId(newChatId));
+     localStorage.setItem("chatId",newChatId)
     console.log("Chat ID set to:", newChatId);
     navigate('/dashboard');
   } else {

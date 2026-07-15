@@ -22,7 +22,8 @@ function Chatsection() {
   const [copySuccess, setCopySuccess] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
+  let chatIdSelection = ""
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const messagesTrackRef = useRef(null);
@@ -30,9 +31,17 @@ function Chatsection() {
 
   // Sync messages when chat changes
   useEffect(() => {
-    if (chatId) {
-      const c = allChats?.filter((chat) => chat.id === chatId);
-      setMessages(c?.[0]?.messages || []);
+
+    let c = localStorage.getItem("chatId")
+    if (!c) {
+      chatIdSelection = chatId
+    } else {
+      chatIdSelection = c
+    }
+
+    if (chatIdSelection) {
+      const ch = allChats?.filter((chat) => chat.id === chatIdSelection);
+      setMessages(ch?.[0]?.messages || []);
     } else {
       setMessages([]);
     }
