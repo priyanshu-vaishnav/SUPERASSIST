@@ -493,21 +493,21 @@ export default function HomePage() {
             
           </div>
 
-          <div className="nx-hero-trust">
+          {/* <div className="nx-hero-trust">
             <span className="nx-trust-label">Trusted by teams at</span>
             <div className="nx-hero-logos">
               {['Google', 'Microsoft', 'Meta', 'Stripe', 'Shopify', 'Vercel'].map((c) => (
                 <span key={c} className="nx-trust-logo">{c}</span>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         
       </section>
 
       {/* ============ STATS ============ */}
-      <section className="nx-stats nx-reveal">
+      {/* <section className="nx-stats nx-reveal">
         <div className="nx-stats-container">
           {STATS.map((stat, i) => (
             <div className="nx-stat" key={i} style={{ animationDelay: `${i * 0.1}s` }}>
@@ -519,10 +519,10 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* ============ FEATURES ============ */}
-      <section className="nx-section" id="features">
+      {/* <section className="nx-section" id="features">
         <div className="nx-section-header nx-reveal">
           <span className="nx-section-eyebrow">Why SuperAssist</span>
           <h2 className="nx-section-title">
@@ -549,9 +549,9 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
-      {/* ============ MODELS ============ */}
+      {/* ============ MODELS ============
       <section className="nx-section nx-models-section" id="models">
         <div className="nx-section-header nx-reveal">
           <span className="nx-section-eyebrow">Model Family</span>
@@ -605,7 +605,7 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* ============ USE CASES ============ */}
       <section className="nx-section">
