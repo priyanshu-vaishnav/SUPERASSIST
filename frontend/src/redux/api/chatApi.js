@@ -11,14 +11,14 @@ export const chatApi = createApi({
         createUserChat: builder.mutation({
             query: () => ({
                 url: "chat/api/createchat",
-                method: "POST",
+                method: "POST",credentials:"include"
             })
         }),
         deleteUserChat: builder.mutation({
             query: ( {chatId,id}) => ({
                 url: "chat/api/deleteSingleChat",
                 method: "POST",
-                body: { chatId ,id},
+                body: { chatId ,id},credentials:"include"
 
             })
         })
@@ -26,7 +26,7 @@ export const chatApi = createApi({
         fetchUserChat: builder.query({   // mutation nahi, query
             query: () => ({
                 url: 'chat/api/fetchchats',
-                method: 'GET',
+                method: 'GET',credentials:"include"
             }),
         }),
        sendMessage: builder.mutation({
@@ -48,7 +48,7 @@ export const chatApi = createApi({
                     method: "POST",
                     body: formData,
                     formData: true, // Kuch versions mein ye zaruri hai, ya fir:
-                    
+                    credentials:"include"
                 };
             }
         })

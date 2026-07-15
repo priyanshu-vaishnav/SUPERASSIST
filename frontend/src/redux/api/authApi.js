@@ -13,6 +13,7 @@ export const authApi = createApi({
                 url: "auth/api/signup",
                 method: "POST",
                 body: { username, email, password },
+                credentials:"include"
             })
         }),
         // 2. LOGIN: Isko bhi aise hi jodh diya
@@ -21,13 +22,14 @@ export const authApi = createApi({
                 url: 'auth/api/signin',
                 method: 'POST',
                 body: { email, password },
-                useCredentials:true
+                credentials:"include"
             }),
         }),
         signOutUser: builder.mutation({
             query: () => ({
                 url:'auth/api/signout',
                 method: 'POST',
+                credentials:"include"
 
             }),
         }),
