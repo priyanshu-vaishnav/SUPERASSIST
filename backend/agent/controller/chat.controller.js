@@ -60,7 +60,7 @@ const chatController = async (req, res) => {
 
     try {
         // Sirf last 6 messages bhejo agent ko (poori history nahi)
-        const recentMemory = agent_Memory.slice(-6);
+        const recentMemory = agent_Memory.slice(0,50);
 
         const initialState = {
             prompt: humanMessage.trim(),
