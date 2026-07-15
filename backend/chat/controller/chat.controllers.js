@@ -6,18 +6,27 @@ const axios = require('axios')
 
 async function createChat(req, res) {
 
-    const userId = req.userId
-    const { data, error } = await supabaseAdmin.from("chats").insert({
-        user_id: userId,
+   const userId = req.userId;
 
-    })
-    if (!error) {
-        return res.status(200).json({
-            data: data
-        })
+    const { data, error } = await supabaseAdmin
+        .from("chats")
+        .insert({ user_id: userId })
+        .select(); // Inserted data wapas mil jayega
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
     }
-    return res.status(500).json(error)
 
+    // Check karo ki data mila ya nahi
+    if (!data || data.length === 0) {
+        return res.status(500).json({ error: "Failed to create chat record" });
+    }
+
+    // Frontend ko sirf woh object bhejo jisko use karna hai
+    return res.status(200).json({
+        success: true,
+        data: data[0] // 👈 Array ki jagah seedha object bhej rahe hain
+    });
 
 
 
