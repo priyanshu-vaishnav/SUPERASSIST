@@ -503,10 +503,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="nx-hero-visual nx-reveal">
-          <div className="nx-hero-glow" />
-          <CodeDemo />
-        </div>
+        
       </section>
 
       {/* ============ STATS ============ */}
