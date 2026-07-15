@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/auth/api/(.*)", "destination": "/auth/server.js" },
+    { "source": "/chat/api/(.*)", "destination": "/chat/server.js" },
+    { "source": "/agent/api/(.*)", "destination": "/agent/server.js" },
+    { "source": "/(.*)", "destination": "/gateway/server.js" }
+  ]
+}
