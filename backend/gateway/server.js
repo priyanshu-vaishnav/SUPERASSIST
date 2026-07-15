@@ -4,17 +4,18 @@ const proxy = require("express-http-proxy");
 const app = require("./app/app.js");
 const proxyWithHeaders = require("./utils/proxyWithHeaders.js");
 
-// 🚀 RENDER YA LOCAL—Dono me proxies active hongi aur port listen karega!
+// 🚀 RENDER YA LOCAL MODE
 if (process.env.NODE_ENV !== 'production' || process.env.RENDER) {
     console.log("Running in Server Mode (Local/Render) - Express Proxies Active");
     
-    // Agar Render par localhost link nahi milti, toh fallback automatic ports pakad lega
-    app.use("/auth", proxy(process.env.AUTH_GATEWAY || "http://localhost:3001"));
-    app.use("/chat", proxyWithHeaders(process.env.CHAT_GATEWAY || "http://localhost:3002"));
-    app.use("/agent", proxyWithHeaders(process.env.AGENT_GATEWAY || "http://localhost:3003"));
+    // 💡 IP BINDING FIX: Node 18+ ke liye 'localhost' ki jagah strictly '127.0.0.1' use kiya hai
+    // Render ne jo dynamic ports detect kiye hain (10001, 10002, 10003), unhe fallback me set kar diya hai
+    app.use("/auth", proxy(process.env.AUTH_GATEWAY || "http://127.0.0.1:10001"));
+    app.use("/chat", proxyWithHeaders(process.env.CHAT_GATEWAY || "http://127.0.0.1:10002"));
+    app.use("/agent", proxyWithHeaders(process.env.AGENT_GATEWAY || "http://127.0.0.1:10003"));
 
-    // Render automatically aapke main gateway ko port 10000 dega
-    app.listen(process.env.PORT || 3000, () => {
+    // Main gateway ko 0.0.0.0 par strict bind kiya hai taaki Render ise scan kar sake
+    app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
         console.log("Gateway running on port ", process.env.PORT || 3000);
     });
 } 
