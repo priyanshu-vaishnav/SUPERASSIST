@@ -1,4 +1,4 @@
-require("dotenv").config({path:"../.env"})
+require("dotenv").config()
 const proxy = require("express-http-proxy")
 const app = require("./app/app.js")
 
