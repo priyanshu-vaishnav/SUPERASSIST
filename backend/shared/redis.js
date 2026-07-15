@@ -1,28 +1,16 @@
-require("dotenv").config({path:"../.env"})
-const { Redis } = require("ioredis")
-const express = require("express")
-const axios = require("axios")
-const { supabase, supabaseAdmin } = require("../agent/config/supabase")
-const app = express()
+require("dotenv").config(); // dotenvx aur Render automatic root .env utha lenge
+const { Redis } = require("ioredis");
 
-console.log(process.env.REDIS_HOST)
 const redis = new Redis({
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
+});
 
-})
-redis.on("connect", () => console.log("redis connected"))
-redis.on("error", (err) => console.log(err))
+redis.on("connect", () => console.log("🟢 Redis client connected successfully"));
+redis.on("error", (err) => console.log("🔴 Redis Connection Error:", err));
 
-
-
-
-app.listen(3005,()=>{
-    console.log("redis service is running on port 3005")
-})
-
-module.exports = redis
-
-
+// 🌟 Kisi app.listen(3005) ki zaroorat nahi hai yahan!
+// Bas is pure connection object ko export kar do taaki chat aur agent ise use kar sakein.
+module.exports = redis;
