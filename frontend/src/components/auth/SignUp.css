@@ -1241,3 +1241,7 @@ input:focus-visible {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
 }
+
+.input{
+  background-color: white;
+}
