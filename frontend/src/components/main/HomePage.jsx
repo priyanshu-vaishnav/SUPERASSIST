@@ -15,10 +15,10 @@ const NAV_LINKS = [
 ]
 
 const STATS = [
-  { num: '50K+',   label: 'Active Developers' },
-  { num: '2.4B+',  label: 'Tokens Processed' },
-  { num: '99.9%',  label: 'Uptime SLA' },
-  { num: '<100ms', label: 'Avg Response' }
+  { num: '50K+',   label: 'Active Developers', icon: '👥' },
+  { num: '2.4B+',  label: 'Tokens Processed', icon: '⚡' },
+  { num: '99.9%',  label: 'Uptime SLA', icon: '🛡️' },
+  { num: '<100ms', label: 'Avg Response', icon: '🚀' }
 ]
 
 const FEATURES = [
@@ -62,7 +62,7 @@ const FEATURES = [
 
 const MODELS = [
   {
-    name: 'Nexus Ultra',
+    name: 'SuperAssist Ultra',
     badge: 'Most Powerful',
     badgeClass: 'badge-purple',
     desc: 'Our flagship model with PhD-level reasoning across all domains.',
@@ -71,7 +71,7 @@ const MODELS = [
     cost: 5
   },
   {
-    name: 'Nexus Pro',
+    name: 'SuperAssist Pro',
     badge: 'Balanced',
     badgeClass: 'badge-blue',
     desc: 'Optimal balance of intelligence, speed, and cost for production workloads.',
@@ -80,7 +80,7 @@ const MODELS = [
     cost: 3
   },
   {
-    name: 'Nexus Lite',
+    name: 'SuperAssist Lite',
     badge: 'Fastest',
     badgeClass: 'badge-cyan',
     desc: 'Ultra-fast responses for chat, classification, and real-time applications.',
@@ -89,7 +89,7 @@ const MODELS = [
     cost: 1
   },
   {
-    name: 'Nexus Vision',
+    name: 'SuperAssist Vision',
     badge: 'Multimodal',
     badgeClass: 'badge-pink',
     desc: 'Native image and video understanding with state-of-the-art accuracy.',
@@ -112,21 +112,21 @@ const USE_CASES = [
 
 const TESTIMONIALS = [
   {
-    quote: "Nexus AI transformed our product. We shipped features 10× faster and our users love the conversational experience. The API is rock solid.",
+    quote: "SuperAssist transformed our product. We shipped features 10× faster and our users love the conversational experience. The API is rock solid.",
     author: "Sarah Chen",
     role: "CTO at Vercel-style startup",
     avatar: "SC",
     rating: 5
   },
   {
-    quote: "The reasoning capabilities are unmatched. Nexus Ultra solved problems that took our team weeks in under a minute. Truly magical technology.",
+    quote: "The reasoning capabilities are unmatched. SuperAssist Ultra solved problems that took our team weeks in under a minute. Truly magical technology.",
     author: "Marcus Rodriguez",
     role: "Lead Engineer at Fortune 500",
     avatar: "MR",
     rating: 5
   },
   {
-    quote: "We replaced three different AI vendors with Nexus. Better quality, simpler API, and 60% cost reduction. No-brainer migration.",
+    quote: "We replaced three different AI vendors with SuperAssist. Better quality, simpler API, and 60% cost reduction. No-brainer migration.",
     author: "Emily Watson",
     role: "Founder, AI Startup",
     avatar: "EW",
@@ -142,7 +142,7 @@ const PRICING = [
     desc: 'Perfect for exploring and small projects',
     features: [
       '1,000 API requests / month',
-      'Access to Nexus Lite',
+      'Access to SuperAssist Lite',
       'Community support',
       'Basic documentation',
       'Standard rate limits'
@@ -203,6 +203,7 @@ function Logo({ size = 'normal' }) {
   return (
     <div className={`nx-logo nx-logo-${size}`}>
       <div className="nx-logo-mark">
+        <div className="nx-logo-glow" />
         <svg viewBox="0 0 32 32" fill="none">
           <defs>
             <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
@@ -217,7 +218,7 @@ function Logo({ size = 'normal' }) {
           <circle cx="16" cy="16" r="7" stroke="url(#lg)" strokeWidth="1" opacity="0.5" />
         </svg>
       </div>
-      <span className="nx-logo-text">Nexus AI</span>
+      <span className="nx-logo-text">SuperAssist</span>
     </div>
   )
 }
@@ -255,15 +256,15 @@ function ParticleField({ count = 35 }) {
   )
 }
 
-/* Typing animation for code window */
 function CodeDemo() {
   const [text, setText] = useState('')
-  const fullCode = `import { Nexus } from '@nexus/sdk'
+  const [copied, setCopied] = useState(false)
+  const fullCode = `import { SuperAssist } from '@superassist/sdk'
 
-const nexus = new Nexus({ apiKey: 'your-key' })
+const ai = new SuperAssist({ apiKey: 'your-key' })
 
-const response = await nexus.chat({
-  model: 'nexus-ultra',
+const response = await ai.chat({
+  model: 'superassist-ultra',
   messages: [
     { role: 'system', content: 'You are a helpful AI.' },
     { role: 'user',   content: 'Explain quantum computing' }
@@ -300,6 +301,16 @@ for await (const chunk of response) {
     return () => clearTimeout(timeout)
   }, [text, step])
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(fullCode)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Copy failed:', err)
+    }
+  }
+
   return (
     <div className="nx-code-window">
       <div className="nx-code-header">
@@ -311,11 +322,23 @@ for await (const chunk of response) {
           <span className="nx-code-tab">api.py</span>
           <span className="nx-code-tab">config.json</span>
         </div>
-        <button className="nx-code-copy" aria-label="Copy code">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
+        <button className={`nx-code-copy ${copied ? 'copied' : ''}`} onClick={handleCopy} aria-label="Copy code">
+          {copied ? (
+            <>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span>Copy</span>
+            </>
+          )}
         </button>
       </div>
       <div className="nx-code-body">
@@ -328,7 +351,7 @@ for await (const chunk of response) {
       </div>
       <div className="nx-code-status">
         <span className="nx-status-dot" />
-        <span>Connected to Nexus Ultra</span>
+        <span>Connected to SuperAssist Ultra</span>
         <span className="nx-status-sep">•</span>
         <span>Streaming response</span>
       </div>
@@ -341,17 +364,16 @@ for await (const chunk of response) {
    ============================================ */
 
 export default function HomePage() {
-  const [scrolled, setScrolled]   = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [billingCycle, setBillingCycle] = useState('monthly')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  /* Intersection-based reveal animations */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -366,6 +388,18 @@ export default function HomePage() {
     document.querySelectorAll('.nx-reveal').forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [])
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileOpen])
 
   return (
     <div className="nx-home">
@@ -397,14 +431,14 @@ export default function HomePage() {
           <div className="nx-nav-actions">
             <Link to="/signin" className="nx-btn nx-btn-ghost nx-btn-sm">Sign In</Link>
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-sm">
-              Get Started Free
+              <span>Get Started Free</span>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
               </svg>
             </Link>
             <button
-              className="nx-nav-toggle"
+              className={`nx-nav-toggle ${mobileOpen ? 'active' : ''}`}
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
@@ -414,16 +448,20 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile menu */}
-        <div className={`nx-nav-mobile ${mobileOpen ? 'open' : ''}`}>
-          {NAV_LINKS.map((link) => (
-            <a key={link.label} href={link.href} onClick={() => setMobileOpen(false)}>
-              {link.label}
-            </a>
-          ))}
-          <div className="nx-nav-mobile-actions">
-            <Link to="/signin" className="nx-btn nx-btn-ghost">Sign In</Link>
-            <Link to="/signup" className="nx-btn nx-btn-primary">Get Started</Link>
+        <div
+          className={`nx-nav-mobile ${mobileOpen ? 'open' : ''}`}
+          onClick={(e) => e.target === e.currentTarget && setMobileOpen(false)}
+        >
+          <div className="nx-nav-mobile-inner">
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} onClick={() => setMobileOpen(false)}>
+                {link.label}
+              </a>
+            ))}
+            <div className="nx-nav-mobile-actions">
+              <Link to="/signin" className="nx-btn nx-btn-ghost" onClick={() => setMobileOpen(false)}>Sign In</Link>
+              <Link to="/signup" className="nx-btn nx-btn-primary" onClick={() => setMobileOpen(false)}>Get Started</Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -433,7 +471,7 @@ export default function HomePage() {
         <div className="nx-hero-content nx-reveal">
           <div className="nx-hero-badge">
             <span className="nx-badge-dot" />
-            <span>Now with Nexus Ultra — PhD-level reasoning</span>
+            <span>Now with SuperAssist Ultra — PhD-level reasoning</span>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>
@@ -453,7 +491,7 @@ export default function HomePage() {
 
           <div className="nx-hero-actions">
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-lg">
-              Start Building Free
+              <span>Start Building Free</span>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
@@ -463,12 +501,12 @@ export default function HomePage() {
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
-              Watch Demo
+              <span>Watch Demo</span>
             </a>
           </div>
 
           <div className="nx-hero-trust">
-            <span>Trusted by teams at</span>
+            <span className="nx-trust-label">Trusted by teams at</span>
             <div className="nx-hero-logos">
               {['Google', 'Microsoft', 'Meta', 'Stripe', 'Shopify', 'Vercel'].map((c) => (
                 <span key={c} className="nx-trust-logo">{c}</span>
@@ -488,8 +526,11 @@ export default function HomePage() {
         <div className="nx-stats-container">
           {STATS.map((stat, i) => (
             <div className="nx-stat" key={i} style={{ animationDelay: `${i * 0.1}s` }}>
-              <span className="nx-stat-num">{stat.num}</span>
-              <span className="nx-stat-label">{stat.label}</span>
+              <span className="nx-stat-icon">{stat.icon}</span>
+              <div className="nx-stat-content">
+                <span className="nx-stat-num">{stat.num}</span>
+                <span className="nx-stat-label">{stat.label}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -498,7 +539,7 @@ export default function HomePage() {
       {/* ============ FEATURES ============ */}
       <section className="nx-section" id="features">
         <div className="nx-section-header nx-reveal">
-          <span className="nx-section-eyebrow">Why Nexus AI</span>
+          <span className="nx-section-eyebrow">Why SuperAssist</span>
           <h2 className="nx-section-title">
             Everything you need to build{' '}
             <span className="nx-gradient-text">AI-native products</span>
@@ -702,10 +743,10 @@ export default function HomePage() {
         <div className="nx-cta-card">
           <div className="nx-cta-glow" />
           <h2>Ready to build the future?</h2>
-          <p>Join 50,000+ developers building with Nexus AI. Get started in seconds.</p>
+          <p>Join 50,000+ developers building with SuperAssist. Get started in seconds.</p>
           <div className="nx-cta-actions">
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-lg">
-              Get Started Free
+              <span>Get Started Free</span>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
@@ -724,9 +765,14 @@ export default function HomePage() {
             <Logo />
             <p>The most powerful AI platform for modern developers. Build, ship, and scale with confidence.</p>
             <div className="nx-footer-socials">
-              {['Twitter', 'GitHub', 'Discord', 'LinkedIn'].map((s) => (
-                <a href="#" key={s} className="nx-social-link" aria-label={s}>
-                  {s[0]}
+              {[
+                { name: 'Twitter', icon: '𝕏' },
+                { name: 'GitHub', icon: '⌨' },
+                { name: 'Discord', icon: '💬' },
+                { name: 'LinkedIn', icon: 'in' }
+              ].map((s) => (
+                <a href="#" key={s.name} className="nx-social-link" aria-label={s.name}>
+                  {s.icon}
                 </a>
               ))}
             </div>
@@ -745,7 +791,7 @@ export default function HomePage() {
         </div>
 
         <div className="nx-footer-bottom">
-          <p>© 2025 Nexus AI. All rights reserved.</p>
+          <p>© 2025 SuperAssist. All rights reserved.</p>
           <p>Crafted with 💜 for the AI community</p>
         </div>
       </footer>
