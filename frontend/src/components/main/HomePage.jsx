@@ -156,13 +156,15 @@ const PRICING = [
     period: '/ month',
     desc: 'For professional developers and teams',
     features: [
-        '100000 token Access',
+      '200000 token Access',
       'Advanced analytics',
       'Custom fine-tuning',
       'Team collaboration',
       '99.9% uptime SLA'
     ],
-  
+    cta: 'Upcoming',
+    highlighted: true,
+   
   },
   {
     name: 'Enterprise',
@@ -179,7 +181,8 @@ const PRICING = [
       'SLA guarantees',
       'Personal account manager'
     ],
-    
+    cta: 'Upcoming',
+    highlighted: false
   }
 ]
 
