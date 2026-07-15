@@ -1,48 +1,24 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { getMe } from '../../api/auth.api';
-import { getUser } from '../../redux/slices/user.slice';
+import React from 'react';
+import { useGetMeQuery } from '../../redux/api/authApi';
 
 export default function Protection({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const dispatch = useDispatch()
+  // RTK Query hook call karo (isne andar hi `credentials: "include"` set kar rakha hai)
+  const { data, isLoading, isError } = useGetMeQuery();
 
-  async function checkUser() {
-    try {
-      setLoading(true);
-      const data = await getMe();
-      
-      // Check karo ki data aur data.data exist karta hai
-      if (data && data.data) {
-        dispatch(getUser(data.data));
-        setUser(data.data);
-      }
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      setUser(null); // User ko null hi rakho agar error aaya
-    } finally {
-      setLoading(false); // Ye block har haal me chalega
-    }
+  if (isLoading) {
+    return <div style={{ color: 'red', fontWeight: 'bold', fontSize: '24px', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading....</div>;
   }
 
-  useEffect(() => {
-    checkUser();
-  }, [dispatch])
-
-  if (loading) {
+  // Agar error aaya (401) ya data null hai
+  if (isError || !data) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', color: 'red', fontWeight: 'bold', fontSize: '24px' }}>
-        Loading....
+      <div style={{ color: 'red', fontWeight: 'bold', fontSize: '24px', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        UNAUTHORIZED USER
+        <a href="/signin" style={{ fontSize: '16px', color: 'blue', marginTop: '10px' }}>Click to Login</a>
       </div>
-    )
+    );
   }
 
-  return user ? (children) : (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', color: 'red', fontWeight: 'bold', fontSize: '24px' }}>
-      UNAUTHORIZED USER
-      {/* Yahan pe tum SignIn component redirect link bhi daal sakte ho */}
-      <a href="/signin" style={{ color: 'blue', fontSize: '16px', marginTop: '10px' }}>Click to Login</a>
-    </div>
-  )
+  // Agar user mil gaya toh children render karo
+  return children;
 }
