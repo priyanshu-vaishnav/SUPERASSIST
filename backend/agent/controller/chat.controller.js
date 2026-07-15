@@ -2,21 +2,44 @@ const graph = require("../graph/graph");
 const { supabase, supabaseAdmin } = require('../config/supabase');
 const redis = require("../../shared/redis");
 
-
 const chatController = async (req, res) => {
 
 
     const userId = req.userId;
-    const { chatId, humanMessage } = req.body;
-
-
+    let { chatId, humanMessage } = req.body;
     
+    if (!chatId || chatId === "" || chatId === null) {
+
+        const { data, error } = await supabaseAdmin
+            .from("chats")
+            .insert({
+                user_id: userId, messages:[ {
+                    "role": "human",
+                    "message": "Hii"
+                }]
+            })
+            .select();
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(500).json({ error: "Failed to create chat record" });
+        }
+
+        chatId = data[0].id
+
+    }
+
+   
+
 
     let agent_Memory = [];
     let token_Usage = 0;
 
     token_Usage = await redis.get(`token-${userId}`)
-   
+
 
     if (token_Usage >= 55000) {
         console.log("overused token")
@@ -51,16 +74,16 @@ const chatController = async (req, res) => {
 
     let promptWithFile = null
     if (req.file) {
-      
+
         promptWithFile = req.file
     } else {
-       
+
         promptWithFile = ""
     }
 
     try {
         // Sirf last 6 messages bhejo agent ko (poori history nahi)
-        const recentMemory = agent_Memory.slice(0,50);
+        const recentMemory = agent_Memory.slice(0, 50);
 
         const initialState = {
             prompt: humanMessage.trim(),
@@ -71,16 +94,16 @@ const chatController = async (req, res) => {
         const result = await graph.invoke(initialState);
 
 
-
         const { data: existingChat, error: fetchError } = await supabaseAdmin
             .from("chats")
             .select("messages")
             .eq("id", chatId)
-            .single();
+            .maybeSingle();
 
         if (fetchError) {
             return res.status(500).json(fetchError);
         }
+       
 
         //setting token usage for the user 
         const total_token_usage = (Number(token_Usage) + result.aiResponse.length);
@@ -88,8 +111,7 @@ const chatController = async (req, res) => {
 
 
 
-
-        const oldMessages = existingChat?.messages || [];
+        const oldMessages = existingChat?.messages || [{ role: "human", message: humanMessage }];
         const newMessages = [
             { role: "human", message: humanMessage },
             { role: "ai", message: result.aiResponse },
@@ -105,6 +127,8 @@ const chatController = async (req, res) => {
             3600 * 24
         );
 
+
+
         const updatedMessages = [...oldMessages, ...newMessages];
 
         const { data, error } = await supabaseAdmin
@@ -115,7 +139,7 @@ const chatController = async (req, res) => {
 
         if (!error) {
 
-            
+
             return res.status(200).json({
                 data,
                 agentUsed: result.agent,
