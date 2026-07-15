@@ -8,16 +8,16 @@ import './HomePage.css'
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
-  { label: 'Models',   href: '#models' },
-  { label: 'Pricing',  href: '#pricing' },
-  { label: 'Docs',     href: '#docs' },
-  { label: 'Blog',     href: '#blog' }
+  { label: 'Models', href: '#models' },
+  { label: 'Pricing', href: '#pricing' },
+  { label: 'Docs', href: '#docs' },
+  { label: 'Blog', href: '#blog' }
 ]
 
 const STATS = [
-  { num: '50K+',   label: 'Active Developers', icon: '👥' },
-  { num: '2.4B+',  label: 'Tokens Processed', icon: '⚡' },
-  { num: '99.9%',  label: 'Uptime SLA', icon: '🛡️' },
+  { num: '50K+', label: 'Active Developers', icon: '👥' },
+  { num: '2.4B+', label: 'Tokens Processed', icon: '⚡' },
+  { num: '99.9%', label: 'Uptime SLA', icon: '🛡️' },
   { num: '<100ms', label: 'Avg Response', icon: '🚀' }
 ]
 
@@ -100,14 +100,14 @@ const MODELS = [
 ]
 
 const USE_CASES = [
-  { icon: '💬', title: 'Conversational AI',   desc: 'Chatbots & assistants' },
-  { icon: '📝', title: 'Content Creation',    desc: 'Articles, blogs, copy' },
-  { icon: '💻', title: 'Code Generation',     desc: 'Build apps 10× faster' },
-  { icon: '📊', title: 'Data Analysis',       desc: 'Insights from any data' },
-  { icon: '🖼️', title: 'Image Generation',    desc: 'Studio-quality visuals' },
-  { icon: '🎙️', title: 'Speech & Audio',      desc: 'Natural voice synthesis' },
-  { icon: '🔍', title: 'Semantic Search',     desc: 'Find anything instantly' },
-  { icon: '🤖', title: 'Autonomous Agents',   desc: 'Multi-step task automation' }
+  { icon: '💬', title: 'Conversational AI', desc: 'Chatbots & assistants' },
+  { icon: '📝', title: 'Content Creation', desc: 'Articles, blogs, copy' },
+  { icon: '💻', title: 'Code Generation', desc: 'Build apps 10× faster' },
+  { icon: '📊', title: 'Data Analysis', desc: 'Insights from any data' },
+  { icon: '🖼️', title: 'Image Generation', desc: 'Studio-quality visuals' },
+  { icon: '🎙️', title: 'Speech & Audio', desc: 'Natural voice synthesis' },
+  { icon: '🔍', title: 'Semantic Search', desc: 'Find anything instantly' },
+  { icon: '🤖', title: 'Autonomous Agents', desc: 'Multi-step task automation' }
 ]
 
 const TESTIMONIALS = [
@@ -164,7 +164,7 @@ const PRICING = [
     ],
     cta: 'Upcoming',
     highlighted: true,
-   
+
   },
   {
     name: 'Enterprise',
@@ -187,10 +187,10 @@ const PRICING = [
 ]
 
 const FOOTER_LINKS = {
-  Product:   ['Features', 'Pricing', 'Models', 'API', 'Changelog'],
+  Product: ['Features', 'Pricing', 'Models', 'API', 'Changelog'],
   Resources: ['Documentation', 'Tutorials', 'Blog', 'Community', 'Status'],
-  Company:   ['About', 'Careers', 'Press', 'Contact', 'Partners'],
-  Legal:     ['Privacy', 'Terms', 'Security', 'Compliance', 'Cookies']
+  Company: ['About', 'Careers', 'Press', 'Contact', 'Partners'],
+  Legal: ['Privacy', 'Terms', 'Security', 'Compliance', 'Cookies']
 }
 
 /* ============================================
@@ -205,13 +205,13 @@ function Logo({ size = 'normal' }) {
         <svg viewBox="0 0 32 32" fill="none">
           <defs>
             <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-              <stop offset="0%"   stopColor="#a78bfa" />
-              <stop offset="50%"  stopColor="#60a5fa" />
+              <stop offset="0%" stopColor="#a78bfa" />
+              <stop offset="50%" stopColor="#60a5fa" />
               <stop offset="100%" stopColor="#22d3ee" />
             </linearGradient>
           </defs>
           <path d="M16 2L4 9v14l12 7 12-7V9L16 2z"
-                stroke="url(#lg)" strokeWidth="2" fill="rgba(139,92,246,0.1)" />
+            stroke="url(#lg)" strokeWidth="2" fill="rgba(139,92,246,0.1)" />
           <circle cx="16" cy="16" r="4" fill="url(#lg)" />
           <circle cx="16" cy="16" r="7" stroke="url(#lg)" strokeWidth="1" opacity="0.5" />
         </svg>
@@ -324,15 +324,15 @@ for await (const chunk of response) {
           {copied ? (
             <>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
+                <polyline points="20 6 9 17 4 12" />
               </svg>
               <span>Copied!</span>
             </>
           ) : (
             <>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
               <span>Copy</span>
             </>
@@ -431,8 +431,8 @@ export default function HomePage() {
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-sm">
               <span>Get Started Free</span>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
             <button
@@ -467,7 +467,7 @@ export default function HomePage() {
       {/* ============ HERO ============ */}
       <section className="nx-hero">
         <div className="nx-hero-content nx-reveal">
-          
+
 
           <h1 className="nx-hero-title">
             Build the future with{' '}
@@ -475,20 +475,20 @@ export default function HomePage() {
           </h1>
 
           <p className="nx-hero-subtitle">
-            The most powerful AI platform for developers. State-of-the-art models,
-            lightning-fast inference, and an API that just works. From prototype
-            to production in minutes.
+            The AI assistant that actually knows which agent to call. Chat, search,
+            code, and PDF understanding — routed intelligently through a multi-agent
+            system built on LangGraph. Ask anything, get the right answer, every time.
           </p>
 
           <div className="nx-hero-actions">
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-lg">
               <span>Start Building Free</span>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
-            
+
           </div>
 
           {/* <div className="nx-hero-trust">
@@ -501,7 +501,7 @@ export default function HomePage() {
           </div> */}
         </div>
 
-        
+
       </section>
 
       {/* ============ STATS ============ */}
@@ -704,7 +704,7 @@ export default function HomePage() {
                 {plan.features.map((f, j) => (
                   <li key={j}>
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
                     {f}
                   </li>
@@ -731,8 +731,8 @@ export default function HomePage() {
             <Link to="/signup" className="nx-btn nx-btn-primary nx-btn-lg">
               <span>Get Started Free</span>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
             <a href="#contact" className="nx-btn nx-btn-ghost nx-btn-lg">Talk to Sales</a>
