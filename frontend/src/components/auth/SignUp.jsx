@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSignupUserMutation } from '../../redux/api/authApi'
 import StatusScreen from '../main/StatusScreen'
+import { Link } from 'react-router'
 import './SignUp.css'
 
 function SignUp() {
@@ -16,9 +17,26 @@ function SignUp() {
   const [touched, setTouched] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState(0)
 
   const [signupUser, { isLoading, isError, isSuccess, error, reset }] =
     useSignupUserMutation()
+
+  // Calculate password strength
+  useEffect(() => {
+    if (!formData.password) {
+      setPasswordStrength(0)
+      return
+    }
+    let strength = 0
+    if (formData.password.length >= 8) strength++
+    if (/[a-z]/.test(formData.password)) strength++
+    if (/[A-Z]/.test(formData.password)) strength++
+    if (/\d/.test(formData.password)) strength++
+    if (/[^a-zA-Z0-9]/.test(formData.password)) strength++
+    setPasswordStrength(strength)
+  }, [formData.password])
 
   // Reset form on successful signup
   useEffect(() => {
@@ -26,6 +44,7 @@ function SignUp() {
       setFormData(initialFormState)
       setTouched({})
       setValidationErrors({})
+      setAcceptTerms(false)
       const timer = setTimeout(() => reset(), 2500)
       return () => clearTimeout(timer)
     }
@@ -107,6 +126,10 @@ function SignUp() {
       return
     }
 
+    if (!acceptTerms) {
+      return
+    }
+
     try {
       await signupUser({
         username: formData.name.trim(),
@@ -126,8 +149,31 @@ function SignUp() {
     return 'form-control'
   }
 
+  const getStrengthLabel = () => {
+    if (passwordStrength === 0) return ''
+    if (passwordStrength <= 2) return 'Weak'
+    if (passwordStrength === 3) return 'Fair'
+    if (passwordStrength === 4) return 'Good'
+    return 'Strong'
+  }
+
+  const getStrengthColor = () => {
+    if (passwordStrength <= 2) return 'weak'
+    if (passwordStrength === 3) return 'fair'
+    if (passwordStrength === 4) return 'good'
+    return 'strong'
+  }
+
   return (
     <div className="signup-wrapper">
+      {/* Animated Background */}
+      <div className="bg-gradient">
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="bg-orb bg-orb-3"></div>
+        <div className="bg-grid"></div>
+      </div>
+
       {isLoading && <StatusScreen status={true} type="loading" />}
       {isError && (
         <StatusScreen
@@ -140,12 +186,33 @@ function SignUp() {
 
       <div className="signup-container">
         <div className="signup-card">
+          {/* Brand Logo */}
+          <div className="brand-logo">
+            <div className="logo-glow"></div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            <span>SuperAssist</span>
+          </div>
+
           <div className="signup-header">
             <div className="signup-icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -262,6 +329,26 @@ function SignUp() {
                   )}
                 </button>
               </div>
+
+              {/* Password Strength Meter */}
+              {formData.password && (
+                <div className="password-strength">
+                  <div className="strength-bars">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className={`strength-bar ${
+                          i <= passwordStrength ? `active ${getStrengthColor()}` : ''
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                  <span className={`strength-label ${getStrengthColor()}`}>
+                    {getStrengthLabel()}
+                  </span>
+                </div>
+              )}
+
               {touched.password && validationErrors.password && (
                 <div className="error-message">{validationErrors.password}</div>
               )}
@@ -313,22 +400,146 @@ function SignUp() {
               )}
             </div>
 
-            <button type="submit" className="signup-button" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  Creating Account...
-                </>
-              ) : (
-                'Create Account'
-              )}
+            {/* Terms & Conditions */}
+            <label className="terms-wrapper">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                disabled={isLoading}
+              />
+              <span className="terms-checkmark"></span>
+              <span className="terms-text">
+                I agree to the{' '}
+                <a href="/terms" className="terms-link" onClick={(e) => e.stopPropagation()}>
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" className="terms-link" onClick={(e) => e.stopPropagation()}>
+                  Privacy Policy
+                </a>
+              </span>
+            </label>
+
+            <button type="submit" className="signup-button" disabled={isLoading || !acceptTerms}>
+              <span className="button-content">
+                {isLoading ? (
+                  <>
+                    <span className="spinner"></span>
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </>
+                )}
+              </span>
             </button>
           </form>
 
+          {/* Divider */}
+          <div className="divider">
+            <span>OR</span>
+          </div>
+
+          {/* Social Sign Up */}
+          <div className="social-buttons">
+            <button type="button" className="social-btn" disabled={isLoading} aria-label="Sign up with Google">
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 11v3.2h4.5c-.2 1.3-1.5 3.8-4.5 3.8-2.7 0-4.9-2.2-4.9-5s2.2-5 4.9-5c1.5 0 2.6.6 3.2 1.2l2.2-2.1C15.9 5.5 14.1 4.7 12 4.7c-4 0-7.3 3.3-7.3 7.3s3.3 7.3 7.3 7.3c4.2 0 7-3 7-7.2 0-.5-.1-.8-.1-1.1H12z"/>
+              </svg>
+            </button>
+            <button type="button" className="social-btn" disabled={isLoading} aria-label="Sign up with GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.17c-3.34.73-4.04-1.41-4.04-1.41-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.31-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23.96-.27 1.98-.4 3-.4s2.04.13 3 .4c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.87.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.56 21.79 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+            </button>
+            <button type="button" className="social-btn" disabled={isLoading} aria-label="Sign up with Twitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#1DA1F2">
+                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733a4.67 4.67 0 0 0 2.048-2.578 9.3 9.3 0 0 1-2.958 1.13 4.66 4.66 0 0 0-7.938 4.25 13.229 13.229 0 0 1-9.602-4.868c-.4.69-.63 1.49-.63 2.342A4.66 4.66 0 0 0 3.96 9.824a4.647 4.647 0 0 1-2.11-.583v.06a4.66 4.66 0 0 0 3.737 4.568 4.692 4.692 0 0 1-2.104.08 4.661 4.661 0 0 0 4.352 3.234 9.348 9.348 0 0 1-5.786 1.995 9.5 9.5 0 0 1-1.112-.065 13.175 13.175 0 0 0 7.14 2.093c8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602a9.47 9.47 0 0 0 2.323-2.41l.002-.003z"/>
+              </svg>
+            </button>
+          </div>
+
           <p className="signup-footer">
             Already have an account?{' '}
-            <a href="/signin" className="signup-link">Sign In</a>
+            <Link to="/signin" className="signup-link">Sign In</Link>
           </p>
+        </div>
+
+        {/* Side Info Panel - Desktop Only */}
+        <div className="info-panel">
+          <div className="info-content">
+            <div className="info-badge">
+              <span className="pulse-dot"></span>
+              <span>Join 10,000+ Users</span>
+            </div>
+            <h1 className="info-title">
+              Start Your Journey<br />
+              <span className="gradient-text">With SuperAssist</span>
+            </h1>
+            <p className="info-description">
+              Create your account in seconds and unlock the power of AI-driven assistance for all your daily tasks.
+            </p>
+            <div className="feature-list">
+              <div className="feature-item">
+                <div className="feature-icon feature-icon-purple">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
+                <div>
+                  <div className="feature-title">Lightning Fast</div>
+                  <div className="feature-desc">Get answers in milliseconds</div>
+                </div>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon feature-icon-pink">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div className="feature-title">Multi-Layered AI</div>
+                  <div className="feature-desc">Advanced neural processing</div>
+                </div>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon feature-icon-blue">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div className="feature-title">Bank-Grade Security</div>
+                  <div className="feature-desc">Your data stays protected</div>
+                </div>
+              </div>
+            </div>
+            <div className="stats-row">
+              <div className="stat-item">
+                <div className="stat-value">10K+</div>
+                <div className="stat-label">Active Users</div>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <div className="stat-value">99.9%</div>
+                <div className="stat-label">Uptime</div>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <div className="stat-value">4.9★</div>
+                <div className="stat-label">Rating</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

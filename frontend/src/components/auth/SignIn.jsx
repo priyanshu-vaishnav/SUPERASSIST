@@ -148,16 +148,45 @@ function SignIn() {
 
   return (
     <div className="signin-wrapper">
+      {/* Animated Background */}
+      <div className="bg-gradient">
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="bg-orb bg-orb-3"></div>
+        <div className="bg-grid"></div>
+      </div>
+
       {isLoading && <StatusScreen status={true} type="loading" />}
 
       <div className="signin-container">
         <div className="signin-card">
+          {/* Brand Logo */}
+          <div className="brand-logo">
+            <div className="logo-glow"></div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            <span>SuperAssist</span>
+          </div>
+
           <div className="signin-header">
             <div className="signin-icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -290,14 +319,22 @@ function SignIn() {
             </div>
 
             <button type="submit" className="signin-button" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  Signing In...
-                </>
-              ) : (
-                'Sign In'
-              )}
+              <span className="button-content">
+                {isLoading ? (
+                  <>
+                    <span className="spinner"></span>
+                    <span>Signing In...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </>
+                )}
+              </span>
             </button>
           </form>
 
@@ -329,6 +366,65 @@ function SignIn() {
             Don't have an account?{' '}
             <a href="/signup" className="signin-link">Create one</a>
           </p>
+        </div>
+
+        {/* Side Info Panel - Desktop Only */}
+        <div className="info-panel">
+          <div className="info-content">
+            <div className="info-badge">
+              <span className="pulse-dot"></span>
+              <span>AI Powered</span>
+            </div>
+            <h1 className="info-title">
+              Your Intelligent<br />
+              <span className="gradient-text">Super Assistant</span>
+            </h1>
+            <p className="info-description">
+              Experience the future of productivity with AI-driven assistance that adapts to your workflow.
+            </p>
+            <div className="feature-list">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span>Smart Automation</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span>24/7 Availability</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span>Secure & Reliable</span>
+              </div>
+            </div>
+            <div className="stats-row">
+              <div className="stat-item">
+                <div className="stat-value">10K+</div>
+                <div className="stat-label">Active Users</div>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <div className="stat-value">99.9%</div>
+                <div className="stat-label">Uptime</div>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <div className="stat-value">4.9★</div>
+                <div className="stat-label">Rating</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

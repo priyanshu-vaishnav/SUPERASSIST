@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import "./Sidebar.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -6,24 +6,18 @@ import {
   useDeleteUserChatMutation,
   useFetchUserChatQuery,
 } from "../../redux/api/chatApi";
-import { useEffect } from "react";
-import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
-import { useNavigate } from "react-router";
+import { setChatId, setChatMessages} from "../../redux/slices/chat.slice";
 import { getToken } from "../../redux/slices/user.slice";
+import { useNavigate } from "react-router";
 
-
-function Sidebar() 
-
-{
-
-
+function Sidebar() {
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
   const [deleteUserChat, { isLoading: isDeleting }] = useDeleteUserChatMutation();
   const { data, refetch, isFetching } = useFetchUserChatQuery();
 
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
-  const userTokenUsed = useSelector((state) => state.user.token)
+  const userTokenUsed = useSelector((state) => state.user.token);
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -31,31 +25,32 @@ function Sidebar()
   const [searchQuery, setSearchQuery] = useState("");
   const [activeView, setActiveView] = useState("chats");
   const [deletingId, setDeletingId] = useState(null);
+  const [showTokenDetails, setShowTokenDetails] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
+  const menuRef = useRef(null);
+  const userMenuRef = useRef(null);
 
-  console.log("multiple render")
-  // 👇 Token Usage State — you'll manage the logic
-
-  const [showTokenDetails, setShowTokenDetails] = useState(false);
-
+  // ✅ FIXED useEffect - only depends on data
   useEffect(() => {
     if (data?.data) {
-
-
-      dispatch(getToken(data.TOKEN_USED))
+      if (data.TOKEN_USED !== undefined) {
+        dispatch(getToken(data.TOKEN_USED));
+      }
       dispatch(setChatMessages(data.data));
     }
-   
-  }, [chatId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
-
-  const tokenUsage = {
-    used: userTokenUsed,
-    total: 50000,
-    period: "month",
-  }
-
+  const tokenUsage = useMemo(
+    () => ({
+      used: userTokenUsed || 0,
+      total: 50000,
+      period: "month",
+    }),
+    [userTokenUsed]
+  );
 
   // Filtered chats based on search
   const filteredChats = useMemo(() => {
@@ -64,7 +59,9 @@ function Sidebar()
     const query = searchQuery.toLowerCase();
     return data.data.filter((chat) => {
       const title =
-        chat.messages?.[0]?.message?.toLowerCase() || chat.title?.toLowerCase() || "Chat";
+        chat.messages?.[0]?.message?.toLowerCase() ||
+        chat.title?.toLowerCase() ||
+        "Chat";
       return title.includes(query);
     });
   }, [data, searchQuery]);
@@ -91,23 +88,22 @@ function Sidebar()
     return { today, yesterday, lastWeek, older };
   }, [filteredChats]);
 
-  // 👇 Token Usage calculations — derived from state
+  // Token Usage calculations
   const tokenStats = useMemo(() => {
     const { used, total } = tokenUsage;
-
     const percentage = total > 0 ? Math.min((used / total) * 100, 100) : 0;
     const remaining = Math.max(total - used, 0);
-    let status = "safe"; // safe | warning | critical
+    let status = "safe";
     if (percentage >= 90) status = "critical";
     else if (percentage >= 70) status = "warning";
     return { percentage, remaining, status };
-  }, [tokenUsage, userTokenUsed]);
+  }, [tokenUsage]);
 
-  const formatTokens = (n) => {
+  const formatTokens = useCallback((n) => {
     if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
     if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
     return n.toString();
-  };
+  }, []);
 
   const handleNewChat = async () => {
     try {
@@ -121,6 +117,7 @@ function Sidebar()
 
   const handleDeleteChat = async (id, e) => {
     e.stopPropagation();
+    e.preventDefault();
     if (!window.confirm("Delete this conversation?")) return;
     setDeletingId(id);
     try {
@@ -139,20 +136,73 @@ function Sidebar()
     setIsOpen(false);
   };
 
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle responsive collapse on resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 992) {
+        setIsCollapsed(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Close mobile sidebar on escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen]);
 
   const renderChatItem = (chat) => {
     const title =
       chat.messages?.[0]?.message?.slice(0, 40) +
-      (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
+        (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
       chat.title ||
       "New Chat";
 
     return (
       <div
         key={chat.id}
-        className={`chat-item ${chatId === chat.id ? "active" : ""} ${deletingId === chat.id ? "deleting" : ""
-          }`}
+        className={`chat-item ${chatId === chat.id ? "active" : ""} ${
+          deletingId === chat.id ? "deleting" : ""
+        }`}
         onClick={() => handleSelectChat(chat.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSelectChat(chat.id);
+          }
+        }}
       >
         <div className="chat-item-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -166,7 +216,9 @@ function Sidebar()
           </svg>
         </div>
         <div className="chat-item-content">
-          <p className="chat-item-title">{!title || title === "undefined" ? "chat" : title}</p>
+          <p className="chat-item-title">
+            {!title || title === "undefined" ? "chat" : title}
+          </p>
           <span className="chat-item-date">
             {new Date(chat.created_at).toLocaleDateString("en-IN", {
               day: "numeric",
@@ -179,6 +231,7 @@ function Sidebar()
           onClick={(e) => handleDeleteChat(chat.id, e)}
           disabled={deletingId === chat.id}
           title="Delete chat"
+          aria-label="Delete chat"
         >
           {deletingId === chat.id ? (
             <span className="mini-spinner" />
@@ -209,29 +262,16 @@ function Sidebar()
   };
 
   const handleMenuOptions = (option) => {
-
     if (option === "Settings") {
-      navigate("/settings")
+      navigate("/settings");
     }
-    setIsOpen(false)
-  }
-
-  const menuRef = useRef(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    setShowUserMenu(false);
+    setIsOpen(false);
+  };
 
   const settingsOptions = [
-    { icon: '⚙️', label: 'Settings' },
-    { icon: '🚪', label: 'Logout' },
+    { icon: "⚙️", label: "Settings" },
+    { icon: "🚪", label: "Logout" },
   ];
 
   const totalChats = data?.data?.length || 0;
@@ -240,7 +280,7 @@ function Sidebar()
     <>
       {/* Mobile Toggle Button */}
       <button
-        className="mobile-toggle d-lg-none"
+        className="mobile-toggle"
         onClick={() => setIsOpen(true)}
         aria-label="Open sidebar"
       >
@@ -258,21 +298,25 @@ function Sidebar()
       <div
         className={`sidebar-backdrop ${isOpen ? "show" : ""}`}
         onClick={() => setIsOpen(false)}
+        aria-hidden="true"
       />
 
       <aside
-        className={`sidebar ${isOpen ? "open" : ""} ${isCollapsed ? "collapsed" : ""
-          }`}
+        className={`sidebar ${isOpen ? "open" : ""} ${
+          isCollapsed ? "collapsed" : ""
+        }`}
+        aria-label="Sidebar navigation"
       >
         {/* Header */}
         <div className="sidebar-header">
           <div className="logo-section">
             <div className="logo-mark">
-              <span>N</span>
+              <span>S</span>
+              <div className="logo-pulse"></div>
             </div>
             {!isCollapsed && (
               <div className="logo-info">
-                <h6>NexusAI</h6>
+                <h6>SuperAssist</h6>
                 <span>
                   <span className="pulse-dot" />
                   Online
@@ -281,9 +325,10 @@ function Sidebar()
             )}
           </div>
           <button
-            className="collapse-btn d-none d-lg-flex"
+            className="collapse-btn"
             onClick={() => setIsCollapsed(!isCollapsed)}
             title={isCollapsed ? "Expand" : "Collapse"}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
               width="16"
@@ -305,11 +350,18 @@ function Sidebar()
             </svg>
           </button>
           <button
-            className="mobile-close d-lg-none"
+            className="mobile-close"
             onClick={() => setIsOpen(false)}
             aria-label="Close sidebar"
           >
-            ✕
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
 
@@ -347,13 +399,7 @@ function Sidebar()
               viewBox="0 0 24 24"
               fill="none"
             >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
               <path
                 d="M21 21l-4.35-4.35"
                 stroke="currentColor"
@@ -366,14 +412,23 @@ function Sidebar()
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search conversations"
             />
             {searchQuery && (
               <button
                 className="search-clear"
                 onClick={() => setSearchQuery("")}
                 title="Clear"
+                aria-label="Clear search"
               >
-                ✕
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
             )}
           </div>
@@ -381,7 +436,7 @@ function Sidebar()
 
         {/* Tabs */}
         {!isCollapsed ? (
-          <div className="view-tabs">
+          <div className="view-tabs" role="tablist">
             {[
               { id: "chats", label: "Chats", count: totalChats },
               { id: "agents", label: "Agents" },
@@ -391,6 +446,8 @@ function Sidebar()
                 key={tab.id}
                 className={`view-tab ${activeView === tab.id ? "active" : ""}`}
                 onClick={() => setActiveView(tab.id)}
+                role="tab"
+                aria-selected={activeView === tab.id}
               >
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 && (
@@ -402,16 +459,16 @@ function Sidebar()
         ) : (
           <div className="collapsed-tabs">
             {[
-              { id: "chats", icon: "💬" },
-              { id: "agents", icon: "🤖" },
-              { id: "tools", icon: "⚙" },
+              { id: "chats", icon: "💬", title: "Chats" },
+              { id: "agents", icon: "🤖", title: "Agents" },
+              { id: "tools", icon: "🛠", title: "Tools" },
             ].map((tab) => (
               <button
                 key={tab.id}
-                className={`collapsed-tab ${activeView === tab.id ? "active" : ""
-                  }`}
+                className={`collapsed-tab ${activeView === tab.id ? "active" : ""}`}
                 onClick={() => setActiveView(tab.id)}
-                title={tab.id}
+                title={tab.title}
+                aria-label={tab.title}
               >
                 {tab.icon}
               </button>
@@ -498,12 +555,20 @@ function Sidebar()
           )}
         </div>
 
-        {/* 🆕 Token Usage Section */}
+        {/* Token Usage Section */}
         {!isCollapsed ? (
           <div className={`token-usage-section ${tokenStats.status}`}>
             <div
               className="token-usage-header"
               onClick={() => setShowTokenDetails(!showTokenDetails)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setShowTokenDetails(!showTokenDetails);
+                }
+              }}
             >
               <div className="token-usage-label">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -554,7 +619,6 @@ function Sidebar()
             )}
           </div>
         ) : (
-          // Collapsed view — just a small circular indicator
           <div
             className={`token-usage-collapsed ${tokenStats.status}`}
             title={`${tokenStats.percentage.toFixed(0)}% used`}
@@ -567,9 +631,7 @@ function Sidebar()
               <path
                 className="token-circle-fill"
                 d="M18 2a16 16 0 1 1 0 32 16 16 0 0 1 0-32"
-                style={{
-                  strokeDasharray: `${tokenStats.percentage}, 100`,
-                }}
+                style={{ strokeDasharray: `${tokenStats.percentage}, 100` }}
               />
             </svg>
             <span className="token-circle-text">
@@ -582,26 +644,28 @@ function Sidebar()
         <div className="sidebar-footer">
           <div className={`user-card ${isCollapsed ? "collapsed" : ""}`}>
             <div className="user-avatar">
-              {user?.avatar || user?.name?.[0]?.toUpperCase() || "U"}
+              {user?.avatar || user?.username[0].toUpperCase() || "U"}
               <span className="user-presence" />
             </div>
             {!isCollapsed && (
               <div className="user-meta">
                 <span className="user-name">
-                  {user?.username || user?.name || "User"}
+                  {user?.username || user?.username || "User"}
                 </span>
                 <span className="user-plan">
                   <span className="plan-dot" />
-                  {user?.tier || "Free"} Plan
+                  {user?.plan || "Free"} Plan
                 </span>
               </div>
             )}
-            <div className="user-menu-container" ref={menuRef}>
+            <div className="user-menu-container" ref={userMenuRef}>
               {!isCollapsed && (
                 <button
                   className="user-menu-btn"
                   title="Menu"
-                  onClick={() => setIsOpen(!isOpen)}
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="User menu"
+                  aria-expanded={showUserMenu}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <circle cx="12" cy="5" r="1.5" fill="currentColor" />
@@ -611,7 +675,7 @@ function Sidebar()
                 </button>
               )}
 
-              {isOpen && (
+              {showUserMenu && (
                 <div className="settings-bar">
                   <div className="settings-header">Settings</div>
                   {settingsOptions.map((option, index) => (
@@ -621,7 +685,9 @@ function Sidebar()
                       onClick={() => handleMenuOptions(option.label)}
                     >
                       <span className="settings-icon">{option.icon}</span>
-                      <span className="settings-label">{(option.label).toLowerCase()}</span>
+                      <span className="settings-label">
+                        {option.label.toLowerCase()}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -633,9 +699,5 @@ function Sidebar()
     </>
   );
 }
-
-
-Sidebar.whyDidYouRender = true;
-
 
 export default Sidebar;
