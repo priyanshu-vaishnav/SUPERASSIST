@@ -2,7 +2,7 @@
   "name": "super-assist-root-backend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"nodemon auth/server.js\" \"nodemon chat/server.js\" \"nodemon agent/server.js\" \"nodemon gateway/server.js\""
+    "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"node auth/server.js\" \"node chat/server.js\" \"node agent/server.js\" \"node gateway/server.js\""
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -15,6 +15,7 @@
     "@langchain/tavily": "^1.2.0",
     "@supabase/supabase-js": "^2.110.2",
     "axios": "^1.18.1",
+    "concurrently": "^10.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -27,8 +28,5 @@
     "nodemon": "^3.1.14",
     "pdf-parse": "^2.4.5",
     "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "concurrently": "^10.0.3"
   }
 }
