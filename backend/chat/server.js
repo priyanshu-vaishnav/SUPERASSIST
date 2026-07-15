@@ -1,15 +1,17 @@
-require("dotenv").config({path:"../.env"})
+require("dotenv").config();
 
-const proxy = require("express-http-proxy")
-const app = require("./app/app.js")
+const app = require("./app/app.js"); // Ya jo bhi aapka express app instance hai
 
-// const dns = require('node:dns');
-// dns.setServers(['8.8.8.8', '1.1.1.1']);
-// const dbConnect = require("./config/db.js")
-// dbConnect();
+// ... agar koi database connection (mongoose) ya middlewares hain toh wo yahan rahenge
 
+// 🚀 LOCAL DEVELOPMENT
+// Agar local machine par chal raha hai, toh purani tarah port par listen karega
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(process.env.CHAT_PORT || 3002, () => {
+        console.log("ChatService running locally on port ", process.env.CHAT_PORT || 3002);
+    });
+}
 
-
-app.listen(process.env.CHAT_PORT,()=>{
-    console.log("ChatService running on port ",process.env.CHAT_PORT)
-})
+// ☁️ VERCEL PRODUCTION
+// Vercel ke liye Express app instance ko export karna zaroori hai
+module.exports = app;

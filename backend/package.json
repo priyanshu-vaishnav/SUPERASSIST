@@ -1,10 +1,8 @@
 {
 
   "scripts": {
-
-    "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"npx nodemon auth/server.js\" \"npx nodemon chat/server.js\" \"npx nodemon agent/server.js\" \"npx nodemon gateway/server.js\""
-
-  },
+  "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"nodemon auth/server.js\" \"nodemon chat/server.js\" \"nodemon agent/server.js\" \"nodemon gateway/server.js\""
+},
 
   "dependencies": {
 
