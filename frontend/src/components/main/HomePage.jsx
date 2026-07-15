@@ -141,7 +141,7 @@ const PRICING = [
     period: 'forever',
     desc: 'Perfect for exploring and small projects',
     features: [
-      '1,000 API requests / month',
+      '50000 token Access',
       'Access to SuperAssist Lite',
       'Community support',
       'Basic documentation',
@@ -151,22 +151,18 @@ const PRICING = [
     highlighted: false
   },
   {
-    name: 'Pro',
+    name: 'Pro (Upcoming)',
     price: '$49',
     period: '/ month',
     desc: 'For professional developers and teams',
     features: [
-      '100,000 API requests / month',
-      'Access to all models',
-      'Priority support',
+        '100000 token Access',
       'Advanced analytics',
       'Custom fine-tuning',
       'Team collaboration',
       '99.9% uptime SLA'
     ],
-    cta: 'Start 14-day Trial',
-    highlighted: true,
-    badge: 'Most Popular'
+  
   },
   {
     name: 'Enterprise',
@@ -183,8 +179,7 @@ const PRICING = [
       'SLA guarantees',
       'Personal account manager'
     ],
-    cta: 'Contact Sales',
-    highlighted: false
+    
   }
 ]
 
