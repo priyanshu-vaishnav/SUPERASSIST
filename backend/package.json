@@ -1,27 +1,34 @@
 {
-
+  "name": "super-assist-root-backend",
+  "version": "1.0.0",
   "scripts": {
-  "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"nodemon auth/server.js\" \"nodemon chat/server.js\" \"nodemon agent/server.js\" \"nodemon gateway/server.js\""
-},
-
+    "dev": "concurrently -n AUTH,CHAT,AGENT,GATEWAY -c blue,green,yellow,magenta \"nodemon auth/server.js\" \"nodemon chat/server.js\" \"nodemon agent/server.js\" \"nodemon gateway/server.js\""
+  },
   "dependencies": {
-
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^1.2.2",
+    "@langchain/google-genai": "^2.2.0",
+    "@langchain/groq": "^1.3.1",
+    "@langchain/langgraph": "^1.4.7",
+    "@langchain/ollama": "^1.3.0",
+    "@langchain/openai": "^1.5.5",
+    "@langchain/tavily": "^1.2.0",
+    "@supabase/supabase-js": "^2.110.2",
+    "axios": "^1.18.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-http-proxy": "^2.1.2",
     "ioredis": "^5.11.1",
+    "langchain": "^1.5.3",
     "mongoose": "^9.7.4",
-    "nodemon": "^3.1.14"
-
+    "multer": "^2.2.0",
+    "nodemon": "^3.1.14",
+    "pdf-parse": "^2.4.5",
+    "zod": "^4.4.3"
   },
-
   "devDependencies": {
-
     "concurrently": "^10.0.3"
-
   }
-
 }
-
