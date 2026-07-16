@@ -598,7 +598,7 @@ function Sidebar() {
                     </button>
 
                     <button
-                      className="sidebar-agent-tab sidebar-agent-pdf"
+                      className={`sidebar-agent-tab sidebar-agent-chat ${(agentActiveness === "pdf")?"active":""}`}
                       onClick={() => handleAgentSelect("pdf")}
                     >
                       <div className="sidebar-agent-icon-box">
@@ -632,7 +632,7 @@ function Sidebar() {
                 // COLLAPSED - Just Icons
                 <div className="sidebar-agents-collapsed">
                   <button
-                    className="sidebar-agent-icon-btn sidebar-agent-chat active"
+                    className={`sidebar-agent-icon-btn sidebar-agent-chat ${(agentActiveness === "chat")?"active":""}`}
                     onClick={() => handleAgentSelect("chat")}
                     title="Chat Agent"
                   >
@@ -640,7 +640,7 @@ function Sidebar() {
                     <span className="sidebar-tooltip">Chat Agent</span>
                   </button>
                   <button
-                    className="sidebar-agent-icon-btn sidebar-agent-code"
+                    className={`sidebar-agent-icon-btn sidebar-agent-chat ${(agentActiveness === "code")?"active":""}`}
                     onClick={() => handleAgentSelect("code")}
                     title="Code Agent"
                   >
@@ -648,7 +648,7 @@ function Sidebar() {
                     <span className="sidebar-tooltip">Code Agent</span>
                   </button>
                   <button
-                    className="sidebar-agent-icon-btn sidebar-agent-search"
+                    className={`sidebar-agent-icon-btn sidebar-agent-chat ${(agentActiveness === "search")?"active":""}`}
                     onClick={() => handleAgentSelect("search")}
                     title="Search Agent"
                   >
@@ -656,7 +656,7 @@ function Sidebar() {
                     <span className="sidebar-tooltip">Search Agent</span>
                   </button>
                   <button
-                    className="sidebar-agent-icon-btn sidebar-agent-pdf"
+                    className={`sidebar-agent-icon-btn sidebar-agent-chat ${(agentActiveness === "pdf")?"active":""}`}
                     onClick={() => handleAgentSelect("pdf")}
                     title="PDF Agent"
                   >
