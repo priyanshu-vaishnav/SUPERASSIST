@@ -33,12 +33,19 @@ function Chatsection() {
   // Sync messages when chat changes
   useEffect(() => {
 
+    console.log("running this .......", chatId)
     let savedChat = localStorage.getItem("chatId")
-    savedChat ? (dispatch(setChatId(savedChat))) : (chatSelection = chatId)
+     
+    if (savedChat) {
+        dispatch(setChatId(savedChat))
+    }
     if (chatId) {
-      localStorage.setItem("chatId",chatId)
+      localStorage.setItem("chatId", chatId)
       const c = allChats?.filter((chat) => chat.id === chatId);
       setMessages(c?.[0]?.messages || []);
+      
+      console.log("that run")
+
     } else {
       setMessages([]);
     }
@@ -100,6 +107,7 @@ function Chatsection() {
         dispatch(getToken(response.TOKEN_USED));
       }
       dispatch(setAgent(response.agentUsed))
+
       const aiReply =
         response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
       setMessages((prev) => [
@@ -464,6 +472,7 @@ function Chatsection() {
           </button>
         </div>
 
+
         <div className="composer-footer">
           <span>
             {chatInfo.title} can make mistakes. Verify important info.
@@ -473,6 +482,11 @@ function Chatsection() {
     </div>
   );
 }
+
+
+/**
+ * Message bubble components for display the chats in the chatSection
+ */
 
 function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySuccess, messageIndex }) {
   const isMe = message.role === "human";

@@ -142,7 +142,9 @@ function Sidebar() {
   const handleSelectChat = (id) => {
     dispatch(setChatId(id));
     localStorage.setItem("chatId", id)
+    refetch();
     setIsOpen(false);
+
   };
 
   // Close menus when clicking outside
