@@ -40,7 +40,7 @@ USER PROMPT IS:${state.prompt}
 
     const response = await model.invoke(Prompt)
 
-    console.log(response.content)
+    
 
     return {
         ...state,

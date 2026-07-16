@@ -79,20 +79,20 @@ const Setting = ({ onClose }) => {
   const handleDeleteMemory = () => {
     if (window.confirm('Are you sure you want to delete all AI memory? This cannot be undone.')) {
       // Call your API to delete memory
-      console.log('Memory deleted');
+     
       alert('All AI memory has been cleared successfully.');
     }
   };
 
   const handleSaveProfile = () => {
     // Call your API to save profile
-    console.log('Profile saved:', profile);
+   
     alert('Profile updated successfully!');
   };
 
   const handleUpgrade = (planId) => {
     // Call your payment API
-    console.log('Upgrading to:', planId);
+  
     setCurrentPlan(planId);
   };
 

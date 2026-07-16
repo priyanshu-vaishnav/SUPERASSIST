@@ -33,7 +33,6 @@ const chatController = async (req, res) => {
     }
 
 
-    console.log("incoming chat id",chatId)
    
 
 

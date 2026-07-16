@@ -146,7 +146,7 @@ function SignUp() {
 try {
   const response = await createUserChat().unwrap();
   
-  console.log("Full Response:", response);
+ 
 
   // 🌟 FIX: Check karo ki response mein 'data' hai aur wo object hai
   if (response && response.success && response.data) {
@@ -154,7 +154,7 @@ try {
     
     dispatch(setChatId(newChatId));
      localStorage.setItem("chatId",newChatId)
-    console.log("Chat ID set to:", newChatId);
+   
     navigate('/dashboard');
   } else {
     console.error("API structure unexpected:", response);

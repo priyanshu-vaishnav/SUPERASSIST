@@ -40,7 +40,7 @@ export const chatApi = createApi({
                 if (sfile) {
                     formData.append('file', sfile);
                 }else{
-                    console.log("file not given")
+                    console.log("")
                 }
 
                 return {

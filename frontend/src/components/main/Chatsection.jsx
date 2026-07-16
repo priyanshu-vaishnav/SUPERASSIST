@@ -20,6 +20,7 @@ function Chatsection() {
   const [inputText, setInputText] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [pendingChat,setPendingChat] = useState(null)
   const [copySuccess, setCopySuccess] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,8 +33,10 @@ function Chatsection() {
 
   // Sync messages when chat changes
   useEffect(() => {
-
-    console.log("running this .......", chatId)
+  
+ 
+   
+    console.log(pendingChat)
     let savedChat = localStorage.getItem("chatId")
      
     if (savedChat) {
@@ -44,7 +47,6 @@ function Chatsection() {
       const c = allChats?.filter((chat) => chat.id === chatId);
       setMessages(c?.[0]?.messages || []);
       
-      console.log("that run")
 
     } else {
       setMessages([]);
@@ -102,6 +104,7 @@ function Chatsection() {
 
     try {
       setIsTyping(true);
+      setPendingChat(chatId);
       const response = await sendMessage({ chatId, humanMessage: text, sfile }).unwrap();
       if (response?.TOKEN_USED !== undefined) {
         dispatch(getToken(response.TOKEN_USED));
@@ -213,7 +216,7 @@ function Chatsection() {
         </div>
 
         <div className="topbar-right">
-          {searchOpen && (
+          {searchOpen &&  (
             <div className="topbar-search">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
@@ -324,10 +327,11 @@ function Chatsection() {
                   onCopy={handleCopy}
                   copySuccess={copySuccess}
                   messageIndex={i}
+                  
                 />
               ))}
 
-              {isTyping && (
+              {isTyping && (chatId === pendingChat) &&(
                 <div className="bubble-row ai">
                   <div
                     className="bubble-avatar"
@@ -429,7 +433,7 @@ function Chatsection() {
             placeholder={`Message ${chatInfo.title}...`}
             className="composer-input"
             rows="1"
-            disabled={isLoading}
+            disabled={isLoading &&(chatId === pendingChat)}
           />
 
           <button
@@ -452,11 +456,11 @@ function Chatsection() {
           <button
             type="submit"
             className={`composer-send ${inputText.trim() ? "active" : ""}`}
-            disabled={!inputText.trim() || isLoading}
+            disabled={!inputText.trim() || (isLoading && chatId === pendingChat)}
             title="Send message"
             aria-label="Send message"
           >
-            {isLoading ? (
+            {(isLoading && chatId === pendingChat)? (
               <span className="send-spinner" />
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -584,9 +588,15 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
     onCopy(message.message, messageIndex);
   };
 
+
   return (
+
+
+    
+
+    
     <div className={`bubble-row ${isMe ? "me" : "ai"} ${isError ? "error-row" : ""}`}>
-      {!isMe && (
+      {!isMe && ( 
         <div
           className="bubble-avatar"
           style={{
@@ -598,6 +608,8 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
       )}
 
       <div className="bubble-stack">
+
+        
         <div className={`bubble-pill ${isError ? "error" : ""} ${isMe ? "user" : "ai"}`}>
           <div className="bubble-content">{formatMessage(message.message)}</div>
           <button
@@ -649,6 +661,8 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
             "U"}
         </div>
       )}
+
+      
     </div>
   );
 }

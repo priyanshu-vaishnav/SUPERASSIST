@@ -34,10 +34,10 @@ const searchAgent = async (state) => {
         }
 
         const query = state.prompt.trim();
-        console.log(`🔍 [${Date.now() - start}ms] Search: "${query}"`);
+        
 
         const llm = await LLM_MODEL("groq");
-        console.log(`⚡ [${Date.now() - start}ms] LLM ready`);
+      
 
         const agent = createAgent({
             model: llm,
@@ -59,7 +59,7 @@ const searchAgent = async (state) => {
         const hadToolCall = response.messages.some(
             (msg) => msg.tool_calls && msg.tool_calls.length > 0
         );
-        console.log(`✅ [${Date.now() - start}ms] Tool called: ${hadToolCall}`);
+       
 
         const lastMessage = response.messages[response.messages.length - 1];
         let aiResponse = typeof lastMessage.content === 'string' 

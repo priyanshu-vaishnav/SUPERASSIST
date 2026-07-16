@@ -7,7 +7,7 @@ const { AIMessage, ToolMessage } = require("@langchain/core/messages");
 
 async function runAgent( input ) {
 
-    console.log(input)
+    
     let model;
 
     // SYSTEM LOGIC: Env variable check karke model initialize karega

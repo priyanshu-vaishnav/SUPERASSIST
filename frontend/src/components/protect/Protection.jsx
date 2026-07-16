@@ -11,19 +11,19 @@ export default function Protection({ children }) {
 
   async function checkUser() {
     try {
-      setLoading(true);
-      const data = await getMe();
+
       
-      // Check karo ki data aur data.data exist karta hai
+      
+    
       if (data && data.data) {
         dispatch(getUser(data.data));
-        setUser(data.data);
+       
       }
     } catch (error) {
       console.error("Auth check failed:", error);
-      setUser(null); // User ko null hi rakho agar error aaya
+      
     } finally {
-      setLoading(false); // Ye block har haal me chalega
+     
     }
   }
 
