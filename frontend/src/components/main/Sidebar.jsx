@@ -6,20 +6,27 @@ import {
   useDeleteUserChatMutation,
   useFetchUserChatQuery,
 } from "../../redux/api/chatApi";
-import { setChatId, setChatMessages} from "../../redux/slices/chat.slice";
+import { setChatId, setChatMessages } from "../../redux/slices/chat.slice";
 import { getToken } from "../../redux/slices/user.slice";
 import { useNavigate } from "react-router";
+import codeImage from "../../assets/codeImage.png"
+import code from "../../assets/code.png"
+import chat from "../../assets/chat.png"
+import vision from "../../assets/vision.png"
+import pdf from "../../assets/pdf.png"
 
 function Sidebar() {
   const [createUserChat, { isLoading: isCreating }] = useCreateUserChatMutation();
   const [deleteUserChat, { isLoading: isDeleting }] = useDeleteUserChatMutation();
   const { data, refetch, isFetching } = useFetchUserChatQuery();
+  const agentActiveness = useSelector((state)=>state.chat.agent)
 
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
   const userTokenUsed = useSelector((state) => state.user.token);
   const dispatch = useDispatch();
-console.log(user)
+  
+ 
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -134,7 +141,7 @@ console.log(user)
 
   const handleSelectChat = (id) => {
     dispatch(setChatId(id));
-    localStorage.setItem("chatId",id)
+    localStorage.setItem("chatId", id)
     setIsOpen(false);
   };
 
@@ -186,16 +193,15 @@ console.log(user)
   const renderChatItem = (chat) => {
     const title =
       chat.messages?.[0]?.message?.slice(0, 40) +
-        (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
+      (chat.messages?.[0]?.message?.length > 40 ? "..." : "") ||
       chat.title ||
       "New Chat";
 
     return (
       <div
         key={chat.id}
-        className={`chat-item ${chatId === chat.id ? "active" : ""} ${
-          deletingId === chat.id ? "deleting" : ""
-        }`}
+        className={`chat-item ${chatId === chat.id ? "active" : ""} ${deletingId === chat.id ? "deleting" : ""
+          }`}
         onClick={() => handleSelectChat(chat.id)}
         role="button"
         tabIndex={0}
@@ -304,9 +310,8 @@ console.log(user)
       />
 
       <aside
-        className={`sidebar ${isOpen ? "open" : ""} ${
-          isCollapsed ? "collapsed" : ""
-        }`}
+        className={`sidebar ${isOpen ? "open" : ""} ${isCollapsed ? "collapsed" : ""
+          }`}
         aria-label="Sidebar navigation"
       >
         {/* Header */}
@@ -529,15 +534,142 @@ console.log(user)
           )}
 
           {activeView === "agents" && (
-            <div className="empty-view">
+            <div className={`sidebar-agents ${isCollapsed ? "collapsed" : "expanded"}`}>
+
               {!isCollapsed ? (
                 <>
-                  <div className="empty-icon">🤖</div>
-                  <p>No agents available</p>
-                  <span>Coming soon</span>
+                  {/* Mini Header */}
+                  <div className="sidebar-agents-header">
+                    <span className="sidebar-agents-title">AI Agents</span>
+                    <span className="sidebar-agents-badge">5</span>
+                  </div>
+
+                  {/* Agent List */}
+                  <div className="sidebar-agents-list">
+
+                    <button
+                      className={`sidebar-agent-tab sidebar-agent-chat ${(agentActiveness === "chat")?"active":""}`}
+                      onClick={() => handleAgentSelect("chat")}
+                    >
+                      <div className="sidebar-agent-icon-box">
+                        <span className="sidebar-agent-emoji">
+                          <img src={chat} alt="" />
+                        </span>
+                      </div>
+                      <div className="sidebar-agent-content">
+                        <span className="sidebar-agent-name">Chat Agent</span>
+                        <span className="sidebar-agent-status">Active</span>
+                      </div>
+                      <span className="sidebar-agent-arrow">→</span>
+                    </button>
+
+                    <button
+                      className={`sidebar-agent-tab sidebar-agent-chat ${(agentActiveness === "code")?"active":""}`}
+                      onClick={() => handleAgentSelect("code")}
+                    >
+                      <div className="sidebar-agent-icon-box">
+                        <span className="sidebar-agent-emoji">
+                       <img src={code} alt="" />
+                        </span>
+                      </div>
+                      <div className="sidebar-agent-content">
+                        <span className="sidebar-agent-name">Code Agent</span>
+                        <span className="sidebar-agent-status">Active</span>
+                      </div>
+                      <span className="sidebar-agent-arrow">→</span>
+                    </button>
+
+                    <button
+                      className={`sidebar-agent-tab sidebar-agent-chat ${(agentActiveness === "search")?"active":""}`}
+                      onClick={() => handleAgentSelect("search")}
+                    >
+                      <div className="sidebar-agent-icon-box">
+                        <span className="sidebar-agent-emoji">
+                           <img src={codeImage} alt="" />
+                        </span>
+                      </div>
+                      <div className="sidebar-agent-content">
+                        <span className="sidebar-agent-name">Search Agent</span>
+                        <span className="sidebar-agent-status">Active</span>
+                      </div>
+                      <span className="sidebar-agent-arrow">→</span>
+                    </button>
+
+                    <button
+                      className="sidebar-agent-tab sidebar-agent-pdf"
+                      onClick={() => handleAgentSelect("pdf")}
+                    >
+                      <div className="sidebar-agent-icon-box">
+                        <span className="sidebar-agent-emoji">    <img src={pdf} alt="" /></span>
+                      </div>
+                      <div className="sidebar-agent-content">
+                        <span className="sidebar-agent-name">PDF Agent</span>
+                        <span className="sidebar-agent-status">Active</span>
+                      </div>
+                      <span className="sidebar-agent-arrow">→</span>
+                    </button>
+
+                    <button
+                      className="sidebar-agent-tab sidebar-agent-vision sidebar-agent-disabled"
+                      disabled
+                    >
+                      <div className="sidebar-agent-icon-box">
+                        <span className="sidebar-agent-emoji">  <img src={vision} alt="" /></span>
+                        <span className="sidebar-agent-lock">🔒</span>
+                      </div>
+                      <div className="sidebar-agent-content">
+                        <span className="sidebar-agent-name">Vision Agent</span>
+                        <span className="sidebar-agent-status sidebar-agent-coming">Coming Soon</span>
+                      </div>
+                      <span className="sidebar-agent-soon-badge">SOON</span>
+                    </button>
+
+                  </div>
                 </>
               ) : (
-                <span className="collapsed-icon">🤖</span>
+                // COLLAPSED - Just Icons
+                <div className="sidebar-agents-collapsed">
+                  <button
+                    className="sidebar-agent-icon-btn sidebar-agent-chat active"
+                    onClick={() => handleAgentSelect("chat")}
+                    title="Chat Agent"
+                  >
+                      <img src={chat} alt="" />
+                    <span className="sidebar-tooltip">Chat Agent</span>
+                  </button>
+                  <button
+                    className="sidebar-agent-icon-btn sidebar-agent-code"
+                    onClick={() => handleAgentSelect("code")}
+                    title="Code Agent"
+                  >
+                      <img src={code} alt="" />
+                    <span className="sidebar-tooltip">Code Agent</span>
+                  </button>
+                  <button
+                    className="sidebar-agent-icon-btn sidebar-agent-search"
+                    onClick={() => handleAgentSelect("search")}
+                    title="Search Agent"
+                  >
+                    <img src={codeImage} alt="" />
+                    <span className="sidebar-tooltip">Search Agent</span>
+                  </button>
+                  <button
+                    className="sidebar-agent-icon-btn sidebar-agent-pdf"
+                    onClick={() => handleAgentSelect("pdf")}
+                    title="PDF Agent"
+                  >
+                      <img src={pdf} alt="" />
+                    <span className="sidebar-tooltip">PDF Agent</span>
+                  </button>
+                  <button
+                    className="sidebar-agent-icon-btn sidebar-agent-vision sidebar-agent-disabled"
+                    disabled
+                    title="Vision Agent (Coming Soon)"
+                  >
+                      <img src={vision} alt="" />
+                    <span className="sidebar-tooltip">Vision Agent (Soon)</span>
+                  </button>
+                </div>
               )}
             </div>
           )}

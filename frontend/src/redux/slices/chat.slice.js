@@ -5,7 +5,8 @@ const chat = createSlice({
     initialState: {
        
             chatId: null,
-            chatMessage: []
+            chatMessage: [],
+            agent : "chat"
         
     },
     reducers: {
@@ -14,10 +15,13 @@ const chat = createSlice({
         },
         setChatMessages:(state,action)=>{
             state.chatMessage= action.payload
+        },
+        setAgent : (state,action)=>{
+            state.agent = action.payload
         }
     }
 
 })
 
-export const {setChatId,setChatMessages} = chat.actions
+export const {setChatId,setChatMessages ,setAgent} = chat.actions
 export default chat.reducer

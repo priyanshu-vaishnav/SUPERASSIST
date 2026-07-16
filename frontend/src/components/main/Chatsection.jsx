@@ -6,7 +6,7 @@ import "./Chatsection.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useSendMessageMutation } from "../../redux/api/chatApi";
 import { getToken } from "../../redux/slices/user.slice";
-import { setChatId } from "../../redux/slices/chat.slice";
+import { setAgent, setChatId } from "../../redux/slices/chat.slice";
 
 function Chatsection() {
   const [sendMessage, { isLoading }] = useSendMessageMutation();
@@ -99,6 +99,7 @@ function Chatsection() {
       if (response?.TOKEN_USED !== undefined) {
         dispatch(getToken(response.TOKEN_USED));
       }
+      dispatch(setAgent(response.agentUsed))
       const aiReply =
         response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
       setMessages((prev) => [

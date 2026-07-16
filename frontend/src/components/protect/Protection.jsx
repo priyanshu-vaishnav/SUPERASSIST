@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import "./Protection.css"
 
 export default function Protection({ children }) {
-  // RTK Query hook call karo (isne andar hi `credentials: "include"` set kar rakha hai)
+  
   const { data, isLoading, isError } = useGetMeQuery();
   const dispatch = useDispatch();
 
