@@ -112,9 +112,9 @@ const chatController = async (req, res) => {
 
 
         const oldMessages = existingChat?.messages || [{ role: "human", message: humanMessage }];
-        const newMessages = [
-            { role: "human", message: humanMessage },
-            { role: "ai", message: result.aiResponse },
+         const newMessages = [
+            { role: "human", message: humanMessage ,timestamp:Date.now()},
+            { role: "ai", message: result.aiResponse ,timestamp:Date.now()},
         ];
 
         // Ab flat array me hi add hoga, wrap nahi hoga
