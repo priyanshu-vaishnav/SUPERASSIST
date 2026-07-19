@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import './HomePage.css'
+import logo from "../../assets/logo.png"
 
 /* ============================================
    STATIC DATA
@@ -199,25 +200,25 @@ const FOOTER_LINKS = {
 
 function Logo({ size = 'normal' }) {
   return (
-    <div className={`nx-logo nx-logo-${size}`}>
-      <div className="nx-logo-mark">
-        <div className="nx-logo-glow" />
-        <svg viewBox="0 0 32 32" fill="none">
-          <defs>
-            <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-              <stop offset="0%" stopColor="#a78bfa" />
-              <stop offset="50%" stopColor="#60a5fa" />
-              <stop offset="100%" stopColor="#22d3ee" />
-            </linearGradient>
-          </defs>
-          <path d="M16 2L4 9v14l12 7 12-7V9L16 2z"
-            stroke="url(#lg)" strokeWidth="2" fill="rgba(139,92,246,0.1)" />
-          <circle cx="16" cy="16" r="4" fill="url(#lg)" />
-          <circle cx="16" cy="16" r="7" stroke="url(#lg)" strokeWidth="1" opacity="0.5" />
-        </svg>
-      </div>
-      <span className="nx-logo-text">SuperAssist</span>
-    </div>
+    // <div className={`nx-logo nx-logo-${size}`}>
+    //   <div className="nx-logo-mark">
+    //     <div className="nx-logo-glow" />
+    //     <svg viewBox="0 0 32 32" fill="none">
+    //       <defs>
+    //         <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
+    //           <stop offset="0%" stopColor="#a78bfa" />
+    //           <stop offset="50%" stopColor="#60a5fa" />
+    //           <stop offset="100%" stopColor="#22d3ee" />
+    //         </linearGradient>
+    //       </defs>
+    //       <path d="M16 2L4 9v14l12 7 12-7V9L16 2z"
+    //         stroke="url(#lg)" strokeWidth="2" fill="rgba(139,92,246,0.1)" />
+    //       <circle cx="16" cy="16" r="4" fill="url(#lg)" />
+    //       <circle cx="16" cy="16" r="7" stroke="url(#lg)" strokeWidth="1" opacity="0.5" />
+    //     </svg>
+    //   </div>
+      <span className="nx-logo-text"><img src={logo} alt="" style={{height:"60px" ,width:"100px",borderRadius:"10px"}}/></span>
+    
   )
 }
 
