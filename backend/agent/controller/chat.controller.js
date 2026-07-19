@@ -171,7 +171,7 @@ const chatController = async (req, res) => {
             .from("chats")
             .update({ 
                 messages: updatedMessages,
-                updated_at: new Date().toISOString() // Track last activity
+                created_at: new Date().toISOString() // Track last activity
             })
             .eq("id", chatId)
             .select()
