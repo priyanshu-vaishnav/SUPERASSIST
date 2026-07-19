@@ -13,52 +13,47 @@ function Chatsection() {
   const allChats = useSelector((state) => state.chat.chatMessage);
   const chatId = useSelector((state) => state.chat.chatId);
   const user = useSelector((state) => state.user.value);
-  const token = useSelector((state) => state.user.token);
   const dispatch = useDispatch();
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [pendingChat,setPendingChat] = useState(null)
+  const [pendingChat, setPendingChat] = useState(null);
   const [copySuccess, setCopySuccess] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  let chatSelection = ""
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const messagesTrackRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Sync messages when chat changes
+  // ✅ FIX 1: Sync messages ONLY when chatId changes (not on allChats update)
   useEffect(() => {
-  
- 
-   
-    console.log(pendingChat)
-    let savedChat = localStorage.getItem("chatId")
-     
-    if (savedChat) {
-        dispatch(setChatId(savedChat))
+    let savedChat = localStorage.getItem("chatId");
+    if (savedChat && !chatId) {
+      dispatch(setChatId(savedChat));
     }
     if (chatId) {
-      localStorage.setItem("chatId", chatId)
+      localStorage.setItem("chatId", chatId);
+    }
+  }, [chatId, dispatch]);
+
+  useEffect(() => {
+    if (chatId) {
       const c = allChats?.filter((chat) => chat.id === chatId);
       setMessages(c?.[0]?.messages || []);
-      
-
     } else {
       setMessages([]);
     }
-  }, [chatId, allChats]);
+  }, [chatId]); // ✅ Removed allChats dependency to prevent overwriting new messages
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Auto-resize textarea
   const handleInputChange = (e) => {
     setInputText(e.target.value);
     const ta = textareaRef.current;
@@ -83,6 +78,42 @@ function Chatsection() {
     }
   };
 
+  // ✅ FIX 2: Robust response parser
+  const extractAIResponse = (response) => {
+    if (!response) return "No response";
+
+    // Try nested data structure first (your original)
+    if (response.data?.[0]?.messages?.length) {
+      const lastMsg = response.data[0].messages.slice(-1)[0];
+      if (lastMsg?.message) return lastMsg.message;
+    }
+
+    // Try response.data.messages
+    if (response.data?.messages?.length) {
+      const lastMsg = response.data.messages.slice(-1)[0];
+      if (lastMsg?.message) return lastMsg.message;
+    }
+
+    // Try response.data as direct message
+    if (typeof response.data === "string") return response.data;
+    if (response.data?.message) return response.data.message;
+    if (response.data?.reply) return response.data.reply;
+    if (response.data?.response) return response.data.response;
+    if (response.data?.content) return response.data.content;
+    if (response.data?.text) return response.data.text;
+
+    // Try top-level
+    if (response.message) return response.message;
+    if (response.reply) return response.reply;
+    if (response.response) return response.response;
+    if (response.content) return response.content;
+    if (response.text) return response.text;
+
+    // Last resort: log the structure
+    console.warn("⚠️ Unknown response structure:", response);
+    return "No response";
+  };
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
     const text = inputText.trim();
@@ -94,7 +125,7 @@ function Chatsection() {
       timestamp: new Date().toISOString(),
     };
 
-    let sfile = selectedFile;
+    const sfile = selectedFile;
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText("");
@@ -105,20 +136,31 @@ function Chatsection() {
     try {
       setIsTyping(true);
       setPendingChat(chatId);
-      const response = await sendMessage({ chatId, humanMessage: text, sfile }).unwrap();
+
+      const response = await sendMessage({
+        chatId,
+        humanMessage: text,
+        sfile,
+      }).unwrap();
+
+      // ✅ Debug log - check console to see actual response
+      console.log("✅ API Response:", response);
+
       if (response?.TOKEN_USED !== undefined) {
         dispatch(getToken(response.TOKEN_USED));
       }
-      dispatch(setAgent(response.agentUsed))
+      if (response?.agentUsed) {
+        dispatch(setAgent(response.agentUsed));
+      }
 
-      const aiReply =
-        response?.data?.[0]?.messages?.slice(-1)[0]?.message || "No response";
+      const aiReply = extractAIResponse(response);
+
       setMessages((prev) => [
         ...prev,
         { role: "ai", message: aiReply, timestamp: new Date().toISOString() },
       ]);
     } catch (error) {
-      console.error("Failed to send message:", error?.data);
+      console.error("❌ Failed to send message:", error?.data || error);
       setMessages((prev) => [
         ...prev,
         {
@@ -216,7 +258,7 @@ function Chatsection() {
         </div>
 
         <div className="topbar-right">
-          {searchOpen &&  (
+          {searchOpen && (
             <div className="topbar-search">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
@@ -327,11 +369,10 @@ function Chatsection() {
                   onCopy={handleCopy}
                   copySuccess={copySuccess}
                   messageIndex={i}
-                  
                 />
               ))}
 
-              {isTyping && (chatId === pendingChat) &&(
+              {isTyping && chatId === pendingChat && (
                 <div className="bubble-row ai">
                   <div
                     className="bubble-avatar"
@@ -433,7 +474,7 @@ function Chatsection() {
             placeholder={`Message ${chatInfo.title}...`}
             className="composer-input"
             rows="1"
-            disabled={isLoading &&(chatId === pendingChat)}
+            disabled={isLoading && chatId === pendingChat}
           />
 
           <button
@@ -460,7 +501,7 @@ function Chatsection() {
             title="Send message"
             aria-label="Send message"
           >
-            {(isLoading && chatId === pendingChat)? (
+            {isLoading && chatId === pendingChat ? (
               <span className="send-spinner" />
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -476,21 +517,13 @@ function Chatsection() {
           </button>
         </div>
 
-
         <div className="composer-footer">
-          <span>
-            {chatInfo.title} can make mistakes. Verify important info.
-          </span>
+          <span>{chatInfo.title} can make mistakes. Verify important info.</span>
         </div>
       </form>
     </div>
   );
 }
-
-
-/**
- * Message bubble components for display the chats in the chatSection
- */
 
 function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySuccess, messageIndex }) {
   const isMe = message.role === "human";
@@ -588,15 +621,9 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
     onCopy(message.message, messageIndex);
   };
 
-
   return (
-
-
-    
-
-    
     <div className={`bubble-row ${isMe ? "me" : "ai"} ${isError ? "error-row" : ""}`}>
-      {!isMe && ( 
+      {!isMe && (
         <div
           className="bubble-avatar"
           style={{
@@ -608,8 +635,6 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
       )}
 
       <div className="bubble-stack">
-
-        
         <div className={`bubble-pill ${isError ? "error" : ""} ${isMe ? "user" : "ai"}`}>
           <div className="bubble-content">{formatMessage(message.message)}</div>
           <button
@@ -661,8 +686,6 @@ function MessageBubble({ message, user, chatInfo, showTime, time, onCopy, copySu
             "U"}
         </div>
       )}
-
-      
     </div>
   );
 }
